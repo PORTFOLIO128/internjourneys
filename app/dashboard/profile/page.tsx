@@ -4,11 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { DashboardNavbar } from '@/components/layout/DashboardNavbar';
 import { mockUser } from '@/data/mockData';
 import { UserProfile } from '@/lib/types';
-import { User, Mail, Phone, GraduationCap, Building2, Check, Save } from 'lucide-react';
+import { User, Check, Save } from 'lucide-react';
 import { useAuth } from '@/lib/authContext';
 
 export default function ProfilePage() {
-  const { user: authUser, refreshUser } = useAuth();
+  const { user: authUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile>(authUser || mockUser);
   const [savedToast, setSavedToast] = useState(false);
 

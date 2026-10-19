@@ -9,7 +9,6 @@ import {
   Layers,
   FileBadge,
   CreditCard,
-  ChevronDown,
   Menu,
   X,
   LogOut,

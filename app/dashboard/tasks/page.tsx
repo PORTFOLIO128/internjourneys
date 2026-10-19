@@ -6,6 +6,7 @@ import { QuestLog } from '@/components/dashboard/QuestLog';
 import { Task } from '@/lib/types';
 import { Search, CalendarDays, Loader2 } from 'lucide-react';
 import { getStudentTasks, submitStudentTask } from '@/lib/supabase/queries';
+import { errorMessage } from '@/lib/errorMessage';
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -18,9 +19,9 @@ export default function TasksPage() {
       const liveTasks = await getStudentTasks();
       setTasks(liveTasks);
       setLoadError('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn('Error fetching tasks from Supabase:', err);
-      setLoadError(err?.message || 'Could not load your tasks from the server.');
+      setLoadError(errorMessage(err, 'Could not load your tasks from the server.'));
     } finally {
       setLoading(false);
     }
@@ -51,9 +52,9 @@ export default function TasksPage() {
     try {
       await submitStudentTask(taskId, { url: submissionUrl });
       await fetchTasks();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Task submit error:', err);
-      setLoadError(err?.message || 'Could not submit this task.');
+      setLoadError(errorMessage(err, 'Could not submit this task.'));
       throw err;
     }
   };

@@ -8,6 +8,7 @@ import { createInternshipEnrollment, getDomainBySlug } from '@/lib/supabase/quer
 import { DomainRow } from '@/lib/supabase/types';
 import { supabase } from '@/lib/supabase/client';
 import { ArrowRight, CheckCircle2, Clock, Loader2, Signal } from 'lucide-react';
+import { errorMessage } from '@/lib/errorMessage';
 
 export default function DomainDetailPage() {
   const params = useParams<{ slug: string }>();
@@ -27,15 +28,15 @@ export default function DomainDetailPage() {
 
       try {
         setDomain(await getDomainBySlug(params.slug));
-      } catch (err: any) {
-        setError(err.message || 'Could not load this domain.');
+      } catch (err: unknown) {
+        setError(errorMessage(err, 'Could not load this domain.'));
       } finally {
         setLoading(false);
       }
     };
 
     loadDomain();
-  }, [params.slug]);
+  }, [params.slug, router]);
 
   const startInternship = async () => {
     if (!domain) return;
@@ -50,8 +51,8 @@ export default function DomainDetailPage() {
     try {
       await createInternshipEnrollment(domain.id);
       router.push('/dashboard/tasks');
-    } catch (err: any) {
-      setError(err.message || 'Could not start this internship.');
+    } catch (err: unknown) {
+      setError(errorMessage(err, 'Could not start this internship.'));
     } finally {
       setStarting(false);
     }

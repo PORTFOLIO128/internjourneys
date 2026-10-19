@@ -2,15 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { ShieldCheck, CheckCircle2, XCircle, Award, Calendar, ExternalLink, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, XCircle, ExternalLink, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/common/Logo';
 import { verifyCertificateByCode } from '@/lib/supabase/queries';
+import { errorMessage } from '@/lib/errorMessage';
 
 export default function PublicVerifyPage() {
   const params = useParams();
   const code = params.code as string;
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<Awaited<ReturnType<typeof verifyCertificateByCode>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -23,8 +24,8 @@ export default function PublicVerifyPage() {
         if (!res.valid) {
           setError('Certificate verification record not found.');
         }
-      } catch (err: any) {
-        setError(err.message || 'Certificate verification record not found.');
+      } catch (err: unknown) {
+        setError(errorMessage(err, 'Certificate verification record not found.'));
       } finally {
         setLoading(false);
       }
@@ -133,7 +134,7 @@ export default function PublicVerifyPage() {
             </div>
             <h2 className="text-xl font-bold text-slate-900">Certificate Verification Failed</h2>
             <p className="text-xs text-slate-600 max-w-md mx-auto">
-              {data?.status === 'revoked' ? 'Certificate Revoked' : <>Certificate Not Found. We could not find an active certificate record matching ID: <strong>{code}</strong>.</>}
+              {error || (data?.status === 'revoked' ? 'Certificate Revoked' : <>Certificate Not Found. We could not find an active certificate record matching ID: <strong>{code}</strong>.</>)}
             </p>
             <div className="pt-4">
               <Link

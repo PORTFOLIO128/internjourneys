@@ -13,6 +13,7 @@ import {
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminPayment } from '@/lib/types';
 import { getAdminPayments, updatePaymentStatus } from '@/lib/supabase/queries';
+import { errorMessage } from '@/lib/errorMessage';
 
 type PaymentFilter = 'All' | AdminPayment['status'];
 
@@ -35,9 +36,9 @@ export default function AdminPaymentsPage() {
     try {
       const data = await getAdminPayments();
       if (Array.isArray(data)) setPayments(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Could not fetch admin payments from Supabase:', err);
-      setError(err?.message || 'Could not load payments.');
+      setError(errorMessage(err, 'Could not load payments.'));
     } finally {
       setLoading(false);
     }
@@ -61,9 +62,9 @@ export default function AdminPaymentsPage() {
     try {
       await updatePaymentStatus(id, status);
       setPayments((prev) => prev.map((p) => (p.id === id ? { ...p, status } : p)));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('API update payment notice:', err);
-      alert(err?.message || `Could not update payment status to ${status}.`);
+      alert(errorMessage(err, `Could not update payment status to ${status}.`));
     } finally {
       setSavingId(null);
     }

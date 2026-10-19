@@ -29,7 +29,7 @@ export function getAdminUser(): AdminUser {
   if (stored) {
     try {
       return JSON.parse(stored);
-    } catch (e) {
+    } catch {
       return adminUser;
     }
   }
@@ -49,7 +49,7 @@ export function getMockUser(): UserProfile {
   if (stored) {
     try {
       return JSON.parse(stored);
-    } catch (e) {
+    } catch {
       return mockUser;
     }
   }

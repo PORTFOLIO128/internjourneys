@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { verifyCertificateByCode } from '@/lib/supabase/queries';
+import { errorMessage } from '@/lib/errorMessage';
 
 export const VerifyCertificateSection: React.FC = () => {
   const [certId, setCertId] = useState('');
@@ -40,9 +41,9 @@ export const VerifyCertificateSection: React.FC = () => {
           message: response.status === 'revoked' ? 'Certificate Revoked' : 'Certificate Not Found',
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setLoading(false);
-      setResult({ verified: false, message: error?.message || 'Certificate Not Found' });
+      setResult({ verified: false, message: errorMessage(error, 'Certificate Not Found') });
     }
   };
 

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { DashboardNavbar } from '@/components/layout/DashboardNavbar';
 import { CertificateData } from '@/lib/types';
 import { Award, ShieldCheck, Download, AlertTriangle, Lock, Loader2, ArrowRight, IndianRupee, CheckCircle2 } from 'lucide-react';
@@ -30,7 +31,7 @@ export default function CertificationsPage() {
   const [generatingPreview, setGeneratingPreview] = useState(false);
   const [access, setAccess] = useState<StudentCertificateAccess | null>(null);
 
-  const fetchCertData = async () => {
+  const fetchCertData = useCallback(async () => {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) throw new Error('Please sign in to view your certificate.');
@@ -64,11 +65,11 @@ export default function CertificationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authUser]);
 
   useEffect(() => {
-    fetchCertData();
-  }, []);
+    void fetchCertData();
+  }, [fetchCertData]);
 
   const isVerified = certificate?.status === 'Verified' && access?.eligible === true;
 
@@ -220,7 +221,7 @@ export default function CertificationsPage() {
             
             <div className="lg:col-span-8 bg-white p-4 sm:p-6 rounded-3xl border-2 border-indigo-100 shadow-2xl">
               <div className="aspect-[1456/1024] w-full overflow-hidden rounded-xl bg-slate-100">
-                {previewUrl ? <img src={previewUrl} alt="Generated internship certificate" className="h-full w-full object-contain" /> : <div className="flex h-full items-center justify-center text-center text-sm font-semibold text-slate-500">Select Preview Certificate to generate your certificate.</div>}
+                {previewUrl ? <Image src={previewUrl} alt="Generated internship certificate" width={1456} height={1024} unoptimized className="h-full w-full object-contain" /> : <div className="flex h-full items-center justify-center text-center text-sm font-semibold text-slate-500">Select Preview Certificate to generate your certificate.</div>}
               </div>
             </div>
 
