@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FileBadge,
   FileText,
@@ -11,15 +11,57 @@ import {
   Eye,
 } from 'lucide-react';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
-import { offerLetterTemplates } from '@/data/adminMockData';
-import { mockCertificate, mockUser } from '@/data/mockData';
+import { OfferLetterTemplate } from '@/lib/types';
+import { getIssuedCertificatesAdmin } from '@/lib/supabase/queries';
 
 export default function AdminCertificateOfferPage() {
-  const [templates, setTemplates] = useState(offerLetterTemplates);
+  const [templates, setTemplates] = useState<OfferLetterTemplate[]>([]);
   const [tab, setTab] = useState<'certificate' | 'offer'>('certificate');
-  const [recipientName, setRecipientName] = useState(mockCertificate.studentName);
-  const [program, setProgram] = useState('Full Stack Development Internship');
+  const [recipientName, setRecipientName] = useState('');
+  const [program, setProgram] = useState('');
+  const [certId, setCertId] = useState('');
+  const [issueDate, setIssueDate] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState<'certificate' | 'offer'>('certificate');
+  const [showCreateOffer, setShowCreateOffer] = useState(false);
+
+  const latestTemplate = templates[templates.length - 1];
+
+  const toMediaUrl = (path?: string): string => {
+    if (!path) return '';
+    if (/^https?:\/\//.test(path)) return path;
+    return path;
+  };
+
+  const downloadLatestOfferLetter = () => {
+    const url = toMediaUrl(latestTemplate?.fileUrl);
+    if (url) window.open(url, '_blank');
+  };
+
+  const fetchData = async () => {
+    try {
+      const certificates = await getIssuedCertificatesAdmin();
+      if (Array.isArray(certificates) && certificates.length > 0) {
+        const latest = certificates[certificates.length - 1] as any;
+        const fullName = latest.student_name || '';
+        const domainName = latest.domain_name || '';
+        if (fullName) setRecipientName(fullName);
+        if (domainName) setProgram(`${domainName} Internship`);
+        if (latest.certificate_id) setCertId(latest.certificate_id);
+        if (latest.issue_date) setIssueDate(latest.issue_date);
+      }
+    } catch (err: any) {
+      console.error('Could not fetch certificate data from Supabase:', err);
+      setError(err?.message || 'Could not load credential data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const toggleTemplateStatus = (id: string) => {
     setTemplates((prev) =>
@@ -33,7 +75,7 @@ export default function AdminCertificateOfferPage() {
         icon={FileBadge}
         badge="Template Designer"
         title="Certificate & Offer Letter"
-        subtitle="Design and manage the official CareerAI credentials issued to interns."
+        subtitle="Design and manage the official InternJourneys credentials issued to interns."
         action={
           <div className="flex gap-2">
             <button
@@ -55,6 +97,18 @@ export default function AdminCertificateOfferPage() {
           </div>
         }
       />
+
+      {loading && (
+        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-500">
+          Loading credential templates from database…
+        </div>
+      )}
+
+      {error && !loading && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
+          {error}
+        </div>
+      )}
 
       {/* CERTIFICATE TAB */}
       {tab === 'certificate' && (
@@ -91,14 +145,16 @@ export default function AdminCertificateOfferPage() {
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Issued On</label>
                 <input
-                  defaultValue={mockCertificate.issueDate}
+                  value={issueDate}
+                  onChange={(e) => setIssueDate(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 text-xs font-medium text-slate-900 outline-none"
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Certificate ID</label>
                 <input
-                  defaultValue={mockCertificate.certId}
+                  value={certId}
+                  onChange={(e) => setCertId(e.target.value)}
                   disabled
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono font-bold text-indigo-600 cursor-not-allowed"
                 />
@@ -114,7 +170,7 @@ export default function AdminCertificateOfferPage() {
                 Preview
               </button>
               <button
-                onClick={() => alert("Updating certificate template...")}
+                onClick={() => alert(recipientName ? 'Template saved. New certificates issued to interns will use this format.' : 'No certificate records found in the database yet.')}
                 className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 <Download className="w-4 h-4" />
@@ -156,8 +212,8 @@ export default function AdminCertificateOfferPage() {
 
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6 text-xs text-slate-500">
                   <div className="text-left space-y-1">
-                    <p className="font-semibold text-slate-700">Certificate ID: <span className="font-mono text-indigo-600 font-bold">{mockCertificate.certId}</span></p>
-                    <p>Issue Date: <strong>{mockCertificate.issueDate}</strong></p>
+                    <p className="font-semibold text-slate-700">Certificate ID: <span className="font-mono text-indigo-600 font-bold">{certId || 'Pending Issuance'}</span></p>
+                    <p>Issue Date: <strong>{issueDate || '—'}</strong></p>
                   </div>
                   <div className="w-16 h-16 rounded-xl bg-slate-900 text-white p-2 flex flex-col items-center justify-center text-[9px] font-mono text-center leading-tight">
                     <span>QR</span><span>VERIFY</span>
@@ -205,7 +261,10 @@ export default function AdminCertificateOfferPage() {
               ))}
             </div>
 
-            <button className="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-indigo-200 text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors">
+            <button
+              onClick={() => setShowCreateOffer(true)}
+              className="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-indigo-200 text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors"
+            >
               <Plus className="w-4 h-4" />
               Create New Offer Letter Template
             </button>
@@ -221,7 +280,7 @@ export default function AdminCertificateOfferPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center font-bold text-xs">CA</div>
-                    <span className="text-sm font-bold">career<span className="text-indigo-300">ai</span></span>
+                    <span className="text-sm font-bold">Intern<span className="text-indigo-300">Journeys</span></span>
                   </div>
                   <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30">APPROVED</span>
                 </div>
@@ -229,21 +288,43 @@ export default function AdminCertificateOfferPage() {
               <div className="p-5 space-y-3">
                 <h3 className="text-lg font-extrabold text-slate-900">Letter of Offer</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  We are delighted to offer <strong>{recipientName}</strong> a virtual internship position in the <strong>{program}</strong> program at CareerAI.
+                  We are delighted to offer <strong>{recipientName}</strong> a virtual internship position in the <strong>{program}</strong> program at InternJourneys.
                 </p>
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                   <span className="font-semibold">Date:</span>
-                  <span className="font-bold text-slate-700">{mockCertificate.issueDate}</span>
+                  <span className="font-bold text-slate-700">{issueDate || '—'}</span>
                 </div>
               </div>
             </div>
             <button
-              onClick={() => alert("Downloading offer letter template...")}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-colors"
+              onClick={() => downloadLatestOfferLetter()}
+              disabled={!latestTemplate}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-colors disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
-              Download Offer Letter
+              {latestTemplate ? 'Download Offer Letter PDF' : 'No Offer Letters Issued Yet'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Create Offer Letter info modal */}
+      {showCreateOffer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowCreateOffer(false)}>
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 p-6 space-y-4">
+            <h3 className="text-lg font-bold text-slate-900">Offer Letter Templates</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Offer letters are generated automatically from the backend whenever a student enrolls in an internship.
+              The latest issued letter is <strong>{latestTemplate?.name || 'not available yet'}</strong>.
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowCreateOffer(false)}
+                className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

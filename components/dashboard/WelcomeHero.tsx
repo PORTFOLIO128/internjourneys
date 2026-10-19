@@ -1,30 +1,341 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { FileText, CreditCard, Calendar, ShieldCheck,Download } from 'lucide-react';
+import { FileText, CreditCard, Calendar, Download, Loader2 } from 'lucide-react';
 import { UserProfile } from '@/lib/types';
+import { jsPDF } from 'jspdf';
 
 interface WelcomeHeroProps {
   user: UserProfile;
 }
 
+async function imageToDataUrl(path: string): Promise<string> {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`Could not load ${path}`);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function drawRichParagraph(
+  doc: jsPDF,
+  segments: { text: string; bold?: boolean }[],
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number
+) {
+  const words = segments.flatMap((segment) =>
+    segment.text.split(/(\s+)/).filter(Boolean).map((text) => ({ text, bold: segment.bold }))
+  );
+  let line: { text: string; bold?: boolean }[] = [];
+  let lineWidth = 0;
+
+  const drawLine = () => {
+    let cursor = x;
+    line.forEach((word) => {
+      doc.setFont('helvetica', word.bold ? 'bold' : 'normal');
+      doc.text(word.text, cursor, y);
+      cursor += doc.getTextWidth(word.text);
+    });
+    y += lineHeight;
+    line = [];
+    lineWidth = 0;
+  };
+
+  words.forEach((word) => {
+    doc.setFont('helvetica', word.bold ? 'bold' : 'normal');
+    const wordWidth = doc.getTextWidth(word.text);
+    if (line.length > 0 && lineWidth + wordWidth > maxWidth) drawLine();
+    line.push(word);
+    lineWidth += wordWidth;
+  });
+  if (line.length > 0) drawLine();
+  return y;
+}
+
 export const WelcomeHero: React.FC<WelcomeHeroProps> = ({ user }) => {
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadInternJourneysOfferLetter = async () => {
+    try {
+      setDownloading(true);
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const navy = '#092957';
+      const blue = '#1769D1';
+      const gold = '#C6922E';
+      const ink = '#14284A';
+      const muted = '#6A7890';
+      const footerHeight = 88;
+      const today = new Date().toISOString().slice(0, 10);
+      const letterId = `IJAS/INT/${today.replace(/-/g, '')}/${user.internId.replace(/[^A-Z0-9]/gi, '').slice(-6)}`;
+      const [topMarginImage, bottomMarginImage, signatureImage, stampImage, msmeImage] = await Promise.all([
+        imageToDataUrl('/assets/topmargin.png'),
+        imageToDataUrl('/assets/bottom-margin.png'),
+        imageToDataUrl('/assets/signature-founder.png'),
+        imageToDataUrl('/assets/stamp.png'),
+        imageToDataUrl('/assets/image.jpg'),
+      ]);
+
+      doc.setFillColor(255, 255, 255);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      doc.addImage(topMarginImage, 'PNG', 0, 0, pageWidth, 127, undefined, 'FAST');
+      doc.addImage(bottomMarginImage, 'PNG', 0, pageHeight - footerHeight, pageWidth, footerHeight, undefined, 'FAST');
+
+      doc.setTextColor(muted);
+      doc.setFontSize(7);
+      doc.text('EMPOWERING', 36, 160);
+      doc.text('THE NEXT', 36, 175);
+      doc.text('GENERATION', 36, 190);
+      doc.setTextColor(ink);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Date: ${today}`, pageWidth - 164, 160);
+      doc.text(`Offer ID: ${letterId}`, pageWidth - 164, 177);
+
+      doc.setFontSize(17);
+      doc.setTextColor(navy);
+      doc.text('INTERNSHIP OFFER LETTER', pageWidth / 2, 225, { align: 'center' });
+      doc.setDrawColor(blue);
+      doc.setLineWidth(1.5);
+      doc.line(pageWidth / 2 - 96, 234, pageWidth / 2 + 96, 234);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      doc.setTextColor(ink);
+      let y = 275;
+      const left = 36;
+      const maxWidth = pageWidth - 72;
+      const paragraphs: { text: string; bold?: boolean }[][] = [
+        [{ text: `Dear ${user.name},`, bold: true }],
+        [
+          { text: 'We are pleased to offer you the position of ' },
+          { text: `${user.domain} Intern`, bold: true },
+          { text: ' at ' },
+          { text: 'InternJourneys AI Solutions', bold: true },
+          { text: '. We are excited to welcome you to our virtual internship program and look forward to supporting your learning and professional development.' },
+        ],
+        [
+          { text: 'This internship is designed to provide practical, hands-on learning experience, real-world projects, and industry-relevant skills to help you build a strong foundation in the field of ' },
+          { text: user.domain, bold: true },
+          { text: '. Through this program, you will gain access to structured learning materials, guided tasks, and projects to enhance your technical and problem-solving abilities.' },
+        ],
+        [{ text: 'You are required to log in to the InternJourneys platform, complete all assigned tasks, submit your work, and track your progress through the internship dashboard. We encourage you to actively participate, maintain professionalism, and make the most of this learning opportunity.' }],
+        [{ text: 'Upon successful completion of all internship requirements, you will be awarded an Internship Completion Certificate in recognition of your dedication and achievements.' }],
+        [{ text: 'We are confident that this internship will be a valuable step in your career journey and we look forward to seeing your growth and success with ' }, { text: 'InternJourneys AI Solutions', bold: true }, { text: '.' }],
+        [{ text: 'Welcome to the InternJourneys community!' }],
+      ];
+      paragraphs.forEach((paragraph, index) => {
+        y = drawRichParagraph(doc, paragraph, left, y, maxWidth, 15);
+        y += index === 0 ? 18 : 12;
+      });
+
+      doc.setTextColor(ink);
+      doc.setFontSize(10);
+      doc.text('Best Regards,', left, 630);
+      doc.addImage(signatureImage, 'PNG', left, 638, 112, 40, undefined, 'FAST');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('Founder & Program Coordinator', left, 688);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(muted);
+      doc.text('InternJourneys AI Solutions', left, 701);
+      doc.addImage(stampImage, 'PNG', pageWidth - 222, 620, 82, 82, undefined, 'FAST');
+      doc.addImage(msmeImage, 'PNG', pageWidth - 122, 626, 82, 76, undefined, 'FAST');
+      doc.save(`InternJourneys_Offer_Letter_${user.internId}.pdf`);
+    } catch (err: any) {
+      alert(err.message || 'Error downloading offer letter PDF.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleDownloadOfferLetter = async () => {
+    try {
+      setDownloading(true);
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const purple = '#8E1B61';
+      const blue = '#2563EB';
+      const ink = '#1E293B';
+      const muted = '#64748B';
+      const today = new Date().toISOString().slice(0, 10);
+      const role = `${user.domain} Intern`;
+      const duration = user.durationWeeks ? `${user.durationWeeks}-week` : 'virtual';
+      const letterId = `IAI/INT/${today.replace(/-/g, '')}/${user.internId.replace(/[^A-Z0-9]/gi, '').slice(-6)}`;
+
+      doc.setFillColor(255, 255, 255);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      doc.setDrawColor(purple);
+      doc.setLineWidth(2);
+      doc.line(0, 122, pageWidth, 122);
+      doc.setFillColor(purple);
+      doc.triangle(pageWidth - 92, 122, pageWidth - 52, 122, pageWidth - 62, 132, 'F');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(32);
+      doc.setTextColor('#111827');
+      doc.text('Intern', 34, 70);
+      doc.setTextColor(blue);
+      doc.text('Journeys', 119, 70);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor('#94A3B8');
+      doc.text('Learn. Build. Get Hired.', 56, 88);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(ink);
+      const contacts = [
+        '+91 89038 56835',
+        'www.internalai.in',
+        'contact@internalai.in',
+        'Santhosapuram, Chennai - 600073',
+      ];
+      contacts.forEach((line, index) => {
+        const y = 36 + index * 17;
+        doc.setFillColor(purple);
+        doc.circle(pageWidth - 176, y - 3, 5, 'F');
+        doc.setTextColor(ink);
+        doc.text(line, pageWidth - 160, y);
+      });
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('InternJourneys AI Solutions', pageWidth - 176, 168);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(muted);
+      doc.text('Santhosapuram Main Road, Chennai', pageWidth - 218, 184);
+      doc.text('Tamil Nadu, India', pageWidth - 166, 198);
+      doc.text('www.internalai.in', pageWidth - 156, 212);
+      doc.setTextColor(ink);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Date: ${today}`, pageWidth - 176, 236);
+      doc.text(`ID: ${letterId}`, pageWidth - 176, 252);
+
+      doc.setFontSize(15);
+      doc.setTextColor('#0F172A');
+      doc.text('INTERNSHIP OFFER LETTER', pageWidth / 2, 295, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      doc.setTextColor(ink);
+      let y = 330;
+      const left = 42;
+      const maxWidth = pageWidth - 84;
+
+      const paragraphs = [
+        `Dear ${user.name},`,
+        `We are pleased to offer you the position of ${role} at InternJourneys. We are delighted to welcome you to our internship program and look forward to supporting your learning and professional development.`,
+        `This ${duration} internship is designed to provide practical industry exposure, hands-on project experience, and an opportunity to enhance your technical and professional skills through structured learning and real-world assignments.`,
+        'You are required to log in to the InternJourneys Internship Portal to access your dashboard, complete the assigned tasks, submit your work, and track your internship progress. We encourage you to complete all assigned activities with dedication and maintain professional conduct throughout the program.',
+        'Upon successful completion of all assigned tasks and internship requirements, you will be awarded an Internship Completion Certificate in recognition of your successful participation and accomplishments.',
+        'We are confident that this internship will be a valuable step in your professional journey and wish you a rewarding learning experience with InternJourneys.',
+      ];
+
+      paragraphs.forEach((paragraph, index) => {
+        if (index === 0) {
+          doc.setFont('helvetica', 'bold');
+          doc.text(paragraph, left, y);
+          doc.setFont('helvetica', 'normal');
+          y += 24;
+          return;
+        }
+        const lines = doc.splitTextToSize(paragraph, maxWidth);
+        doc.text(lines, left, y, { align: 'justify', maxWidth });
+        y += lines.length * 15 + 14;
+      });
+
+      doc.setDrawColor(248, 231, 241);
+      doc.setLineWidth(34);
+      doc.circle(pageWidth - 95, 540, 94, 'S');
+      doc.setLineWidth(1);
+      doc.setDrawColor(248, 231, 241);
+      for (let index = 0; index < 8; index += 1) {
+        const angle = (Math.PI * 2 * index) / 8;
+        const x1 = pageWidth - 95 + Math.cos(angle) * 30;
+        const y1 = 540 + Math.sin(angle) * 30;
+        const x2 = pageWidth - 95 + Math.cos(angle) * 86;
+        const y2 = 540 + Math.sin(angle) * 86;
+        doc.line(x1, y1, x2, y2);
+        doc.circle(x2, y2, 5, 'S');
+      }
+
+      doc.setTextColor(ink);
+      doc.setFontSize(10);
+      doc.text('Best Regards,', left, 705);
+      doc.setFont('times', 'italic');
+      doc.setFontSize(20);
+      doc.text('Nikhil Aji', left + 10, 752);
+      doc.setDrawColor(ink);
+      doc.setLineWidth(0.6);
+      doc.line(left + 8, 758, left + 82, 758);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('Program Coordinator', left, 776);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(muted);
+      doc.text('InternJourneys', left, 790);
+
+      doc.setDrawColor('#334155');
+      doc.setTextColor('#334155');
+      doc.circle(pageWidth - 228, 754, 28, 'S');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6);
+      doc.text('INTERNJOURNEYS', pageWidth - 251, 748);
+      doc.text('VERIFIED SEAL', pageWidth - 249, 759);
+      doc.setFontSize(5);
+      doc.text('Chennai', pageWidth - 239, 770);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.setTextColor('#7C4A12');
+      doc.text('TRUST', pageWidth - 130, 750, { align: 'center' });
+      doc.setFontSize(8);
+      doc.setTextColor('#111827');
+      doc.text('MSME REGISTERED', pageWidth - 130, 768, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      doc.text('Structured Training & Internship Initiative', pageWidth - 130, 779, { align: 'center' });
+
+      doc.setDrawColor(purple);
+      doc.setLineWidth(2);
+      doc.line(0, pageHeight - 24, pageWidth, pageHeight - 24);
+      doc.setTextColor(muted);
+      doc.setFontSize(7);
+      doc.text('Web Development   |   App Development   |   Digital Solutions   |   IT Consulting   |   Training & Internships', pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+      doc.save(`InternJourneys_Offer_Letter_${user.internId}.pdf`);
+    } catch (err: any) {
+      alert(err.message || 'Error downloading offer letter PDF.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="relative w-full rounded-3xl text-white p-6 sm:p-8 lg:p-10 shadow-hero overflow-hidden border border-indigo-900/50">
 
-      {/* Background Decorative Forest Image */}
-      <div className="absolute inset-0 opacity-75 pointer-events-none overflow-hidden">
+      {/* Dashboard hero background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/assets/forest.jpg"
+          src="/assets/bagr.png"
           alt=""
           aria-hidden="true"
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
         />
+        <div className="absolute inset-0 bg-slate-950/35" />
       </div>
 
-      {/* Grid Layout: Stacked on mobile, 2-column on desktop */}
+      {/* Grid Layout */}
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
         {/* Left Column: Student Welcome */}
@@ -54,7 +365,7 @@ export const WelcomeHero: React.FC<WelcomeHeroProps> = ({ user }) => {
         <div className="lg:col-span-5 flex justify-center lg:justify-end pt-4 lg:pt-0">
           <div className="relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 sm:p-7 w-full max-w-[380px] shadow-2xl space-y-5">
 
-            {/* Metadata Row: Intern ID, Joined Date, Status */}
+            {/* Metadata Row */}
             <div className="grid grid-cols-3 gap-4 text-center">
               {/* Intern ID */}
               <div className="flex flex-col items-center gap-1.5">
@@ -97,11 +408,12 @@ export const WelcomeHero: React.FC<WelcomeHeroProps> = ({ user }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Download Offer Letter */}
               <button
-                onClick={() => alert("Downloading official CareerAI Offer Letter PDF...")}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-white text-slate-900 hover:bg-slate-100 shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                onClick={handleDownloadInternJourneysOfferLetter}
+                disabled={downloading}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-white text-slate-900 hover:bg-slate-100 shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
               >
-                <Download className="w-5 h-5 text-indigo-600" />
-                <span>Download Offer Letter</span>  
+                {downloading ? <Loader2 className="w-4 h-4 animate-spin text-indigo-600" /> : <Download className="w-4 h-4 text-indigo-600" />}
+                <span>{downloading ? "Downloading..." : "Download Offer Letter"}</span>  
               </button>
 
               {/* Pay & Request */}

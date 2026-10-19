@@ -3,10 +3,14 @@
 import React from 'react';
 import { DashboardNavbar } from '@/components/layout/DashboardNavbar';
 import { mockUser } from '@/data/mockData';
-import { IdCard, ShieldCheck, Download, QrCode, CheckCircle2 } from 'lucide-react';
+import { IdCard, CheckCircle2, Download, QrCode } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
+import { useAuth } from '@/lib/authContext';
 
 export default function IdCardPage() {
+  const { user: authUser } = useAuth();
+  const user = authUser || mockUser;
+
   return (
     <div className="min-h-screen bg-background text-slate-900 font-sans flex flex-col antialiased">
       <DashboardNavbar />
@@ -56,11 +60,11 @@ export default function IdCardPage() {
 
             {/* Main Content: Avatar & Info */}
             <div className="flex items-center gap-6 pt-2">
-              {/* Photo Avatar Placeholder */}
+              {/* Photo Avatar */}
               <div className="w-24 h-28 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 p-1 shadow-xl shrink-0">
                 <div className="w-full h-full rounded-[14px] bg-slate-900 flex flex-col items-center justify-center text-white">
                   <div className="w-12 h-12 rounded-full bg-indigo-600 text-white font-extrabold text-lg flex items-center justify-center mb-1">
-                    {mockUser.initials}
+                    {user.initials}
                   </div>
                   <span className="text-[9px] font-mono text-indigo-300 uppercase">OFFICIAL</span>
                 </div>
@@ -69,15 +73,15 @@ export default function IdCardPage() {
               {/* Student Meta */}
               <div className="space-y-1.5">
                 <h3 className="text-xl font-extrabold text-white tracking-tight">
-                  {mockUser.name}
+                  {user.name}
                 </h3>
                 <p className="text-xs font-semibold text-indigo-200">
-                  {mockUser.domain}
+                  {user.domain}
                 </p>
                 <div className="pt-2 text-[11px] space-y-1 text-slate-300">
-                  <p><span className="text-slate-400 font-medium">Intern ID:</span> <strong className="text-white font-mono">{mockUser.internId}</strong></p>
-                  <p><span className="text-slate-400 font-medium">Status:</span> <strong className="text-emerald-400">{mockUser.status}</strong></p>
-                  <p><span className="text-slate-400 font-medium">Joined:</span> <span>{mockUser.joinedOn}</span></p>
+                  <p><span className="text-slate-400 font-medium">Intern ID:</span> <strong className="text-white font-mono">{user.internId}</strong></p>
+                  <p><span className="text-slate-400 font-medium">Status:</span> <strong className="text-emerald-400">{user.status}</strong></p>
+                  <p><span className="text-slate-400 font-medium">Joined:</span> <span>{user.joinedOn}</span></p>
                 </div>
               </div>
             </div>
@@ -85,9 +89,9 @@ export default function IdCardPage() {
             {/* Bottom Section: QR & Security barcode */}
             <div className="border-t border-white/10 pt-4 flex items-center justify-between">
               <div className="text-[10px] text-indigo-200/80 space-y-0.5">
-                <p className="font-bold text-white uppercase tracking-wider">CareerAI Authorization</p>
+                <p className="font-bold text-white uppercase tracking-wider">InternJourneys Authorization</p>
                 <p>Valid for Virtual Internship Program 2026</p>
-                <p className="text-[9px] text-slate-400 font-mono">HASH: 0x8F42...CAI45872</p>
+                <p className="text-[9px] text-slate-400 font-mono">HASH: 0x8F42...{user.internId}</p>
               </div>
               <div className="w-14 h-14 bg-white p-1.5 rounded-xl flex items-center justify-center text-slate-900 shadow-md">
                 <QrCode className="w-10 h-10" />

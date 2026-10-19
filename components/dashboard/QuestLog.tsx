@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ListTodo, CheckCircle2, Clock, Filter, Sparkles } from 'lucide-react';
+import { ListTodo, CheckCircle2 } from 'lucide-react';
 import { Task } from '@/lib/types';
 import { TaskCard } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
@@ -13,7 +13,8 @@ interface QuestLogProps {
 
 export const QuestLog: React.FC<QuestLogProps> = ({ tasks, onTaskSubmit }) => {
   const [filter, setFilter] = useState<'all' | 'completed' | 'pending'>('all');
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const selectedTask = tasks.find((task) => task.id === selectedTaskId) || null;
 
   const filteredTasks = tasks.filter((task) => {
     if (filter === 'completed') return task.status === 'Completed';
@@ -84,7 +85,7 @@ export const QuestLog: React.FC<QuestLogProps> = ({ tasks, onTaskSubmit }) => {
             <TaskCard
               key={task.id}
               task={task}
-              onOpenDetails={(t) => setSelectedTask(t)}
+              onOpenDetails={(taskToOpen) => setSelectedTaskId(taskToOpen.id)}
             />
           ))}
         </div>
@@ -106,7 +107,7 @@ export const QuestLog: React.FC<QuestLogProps> = ({ tasks, onTaskSubmit }) => {
         <TaskDetailModal
           task={selectedTask}
           isOpen={!!selectedTask}
-          onClose={() => setSelectedTask(null)}
+          onClose={() => setSelectedTaskId(null)}
           onTaskSubmit={onTaskSubmit}
         />
       )}

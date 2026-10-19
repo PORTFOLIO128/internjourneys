@@ -1,35 +1,61 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardNavbar } from '@/components/layout/DashboardNavbar';
 import { QuestLog } from '@/components/dashboard/QuestLog';
-import { mockTasks } from '@/data/mockData';
 import { Task } from '@/lib/types';
-import { Search, CalendarDays } from 'lucide-react';
+import { Search, CalendarDays, Loader2 } from 'lucide-react';
+import { getStudentTasks, submitStudentTask } from '@/lib/supabase/queries';
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+
+  const fetchTasks = async () => {
+    try {
+      const liveTasks = await getStudentTasks();
+      setTasks(liveTasks);
+      setLoadError('');
+    } catch (err: any) {
+      console.warn('Error fetching tasks from Supabase:', err);
+      setLoadError(err?.message || 'Could not load your tasks from the server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  useEffect(() => {
+    const hasPendingVerification = tasks.some((task) =>
+      task.internshipStatus === 'VERIFICATION_PENDING' || task.internshipStatus === 'SUBMITTED'
+    );
+    if (!hasPendingVerification) return;
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void fetchTasks();
+    }, 15000);
+    return () => window.clearInterval(intervalId);
+  }, [tasks]);
 
   const filteredTasks = tasks.filter(task =>
     task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     task.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleTaskSubmit = (taskId: string, submissionUrl: string) => {
-    setTasks(prev =>
-      prev.map(t =>
-        t.id === taskId
-          ? {
-              ...t,
-              status: 'Completed',
-              submittedOnTrack: true,
-              submissionUrl,
-              bottomStatusText: 'Completed Successfully!',
-            }
-          : t
-      )
-    );
+  const handleTaskSubmit = async (taskId: string, submissionUrl: string) => {
+    try {
+      await submitStudentTask(taskId, { url: submissionUrl });
+      await fetchTasks();
+    } catch (err: any) {
+      console.error('Task submit error:', err);
+      setLoadError(err?.message || 'Could not submit this task.');
+      throw err;
+    }
   };
 
   return (
@@ -66,7 +92,24 @@ export default function TasksPage() {
         </div>
 
         {/* Quest Log Component */}
-        <QuestLog tasks={filteredTasks} onTaskSubmit={handleTaskSubmit} />
+        {loading ? (
+          <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-3">
+            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mx-auto" />
+            <p className="text-xs font-semibold text-slate-600">Loading your tasks...</p>
+          </div>
+        ) : loadError && tasks.length === 0 ? (
+          <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-3">
+            <p className="text-xs font-semibold text-slate-600">{loadError}</p>
+            <button
+              onClick={fetchTasks}
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : (
+          <QuestLog tasks={filteredTasks} onTaskSubmit={handleTaskSubmit} />
+        )}
       </main>
     </div>
   );

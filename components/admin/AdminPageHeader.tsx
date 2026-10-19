@@ -5,6 +5,7 @@ interface AdminPageHeaderProps {
   icon: LucideIcon;
   badge: string;
   title: string;
+  subtitle?: string;
   action?: React.ReactNode;
 }
 
@@ -12,6 +13,8 @@ export const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({
   icon: Icon,
   badge,
   title,
+  subtitle,
+  action,
 }) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-card">
@@ -23,7 +26,11 @@ export const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
           {title}
         </h1>
+        {subtitle && (
+          <p className="text-xs sm:text-sm text-slate-500 font-medium">{subtitle}</p>
+        )}
       </div>
+      {action && <div>{action}</div>}
     </div>
   );
 };

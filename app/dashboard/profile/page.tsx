@@ -1,21 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardNavbar } from '@/components/layout/DashboardNavbar';
 import { mockUser } from '@/data/mockData';
 import { UserProfile } from '@/lib/types';
 import { User, Mail, Phone, GraduationCap, Building2, Check, Save } from 'lucide-react';
-import { saveMockUser } from '@/lib/mockAuth';
+import { useAuth } from '@/lib/authContext';
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<UserProfile>(mockUser);
+  const { user: authUser, refreshUser } = useAuth();
+  const [profile, setProfile] = useState<UserProfile>(authUser || mockUser);
   const [savedToast, setSavedToast] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (authUser) {
+      setProfile(authUser);
+    }
+  }, [authUser]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveMockUser(profile);
     setSavedToast(true);
-    setTimeout(() => setSavedToast(false), 2000);
+    setTimeout(() => setSavedToast(false), 2500);
   };
 
   return (

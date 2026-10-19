@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
-  FileCheck2,
   Layers,
   FileBadge,
   CreditCard,
@@ -17,24 +16,45 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
-import { getAdminUser, setAdminLoggedIn } from '@/lib/mockAuth';
+import { useAuth } from '@/lib/authContext';
 
 export const adminNavItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Students', href: '/admin/students', icon: Users },
   { label: 'Domains & Tasks', href: '/admin/domains-tasks', icon: Layers },
   { label: 'Certificate & Offer Letter', href: '/admin/certificate-offer', icon: FileBadge },
+  { label: 'Certificate Access', href: '/admin/certificate-access', icon: ShieldCheck },
   { label: 'Payments', href: '/admin/payments', icon: CreditCard },
 ];
 
 export const AdminSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, role, isLoading, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const adminUser = getAdminUser();
+
+  useEffect(() => {
+    if (!isLoading && role !== 'admin') {
+      router.replace('/login');
+    }
+  }, [isLoading, role, router]);
+
+  if (isLoading || role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center text-sm font-semibold text-slate-500">
+        Checking administrator access…
+      </div>
+    );
+  }
+
+  const adminUser = {
+    name: user?.name || 'InternJourneys Admin',
+    initials: user?.initials || 'AD',
+    role: 'Super Administrator',
+  };
 
   const handleLogout = () => {
-    setAdminLoggedIn(false);
+    logout();
     router.push('/');
   };
 
