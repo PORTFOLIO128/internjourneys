@@ -9,6 +9,7 @@ import { Task, UserProfile } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/authContext';
 import { getStudentTasks, submitStudentTask } from '@/lib/supabase/queries';
+import { errorMessage } from '@/lib/errorMessage';
 
 export default function DashboardPage() {
   const { user: authUser } = useAuth();
@@ -43,9 +44,9 @@ export default function DashboardPage() {
       const liveTasks = await getStudentTasks();
       setTasks(liveTasks);
       setLoadError('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn('Dashboard Supabase fetch error:', err);
-      setLoadError(err?.message || 'Could not load your dashboard tasks.');
+      setLoadError(errorMessage(err, 'Could not load your dashboard tasks.'));
     } finally {
       setLoading(false);
     }
@@ -55,9 +56,9 @@ export default function DashboardPage() {
     try {
       await submitStudentTask(taskId, { url: submissionUrl });
       await fetchDashboardData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Task submission error:', err);
-      setLoadError(err?.message || 'Could not submit this task.');
+      setLoadError(errorMessage(err, 'Could not submit this task.'));
       throw err;
     }
   };

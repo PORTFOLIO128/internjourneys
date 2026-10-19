@@ -1,13 +1,12 @@
 import React from 'react';
-import { CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, Clock } from 'lucide-react';
 import { TaskStatus } from '@/lib/types';
 
 interface StatusBadgeProps {
   status: TaskStatus | 'Active' | 'Available' | 'Pending';
-  size?: 'sm' | 'md';
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'sm' }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const isCompleted = status === 'Completed';
   const isAvailable = status === 'Available';
   const isActive = status === 'Active';

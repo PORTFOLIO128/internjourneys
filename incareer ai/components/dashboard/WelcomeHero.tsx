@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FileText, CreditCard, Calendar, Download, Loader2 } from 'lucide-react';
 import { UserProfile } from '@/lib/types';
 import { jsPDF } from 'jspdf';
+import { errorMessage } from '@/lib/errorMessage';
 
 interface WelcomeHeroProps {
   user: UserProfile;
@@ -70,7 +71,6 @@ export const WelcomeHero: React.FC<WelcomeHeroProps> = ({ user }) => {
       const pageHeight = doc.internal.pageSize.getHeight();
       const navy = '#092957';
       const blue = '#1769D1';
-      const gold = '#C6922E';
       const ink = '#14284A';
       const muted = '#6A7890';
       const footerHeight = 88;
@@ -149,172 +149,8 @@ export const WelcomeHero: React.FC<WelcomeHeroProps> = ({ user }) => {
       doc.addImage(stampImage, 'PNG', pageWidth - 222, 620, 82, 82, undefined, 'FAST');
       doc.addImage(msmeImage, 'PNG', pageWidth - 122, 626, 82, 76, undefined, 'FAST');
       doc.save(`InternJourneys_Offer_Letter_${user.internId}.pdf`);
-    } catch (err: any) {
-      alert(err.message || 'Error downloading offer letter PDF.');
-    } finally {
-      setDownloading(false);
-    }
-  };
-
-  const handleDownloadOfferLetter = async () => {
-    try {
-      setDownloading(true);
-      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const purple = '#8E1B61';
-      const blue = '#2563EB';
-      const ink = '#1E293B';
-      const muted = '#64748B';
-      const today = new Date().toISOString().slice(0, 10);
-      const role = `${user.domain} Intern`;
-      const duration = user.durationWeeks ? `${user.durationWeeks}-week` : 'virtual';
-      const letterId = `IAI/INT/${today.replace(/-/g, '')}/${user.internId.replace(/[^A-Z0-9]/gi, '').slice(-6)}`;
-
-      doc.setFillColor(255, 255, 255);
-      doc.rect(0, 0, pageWidth, pageHeight, 'F');
-      doc.setDrawColor(purple);
-      doc.setLineWidth(2);
-      doc.line(0, 122, pageWidth, 122);
-      doc.setFillColor(purple);
-      doc.triangle(pageWidth - 92, 122, pageWidth - 52, 122, pageWidth - 62, 132, 'F');
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(32);
-      doc.setTextColor('#111827');
-      doc.text('Intern', 34, 70);
-      doc.setTextColor(blue);
-      doc.text('Journeys', 119, 70);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.setTextColor('#94A3B8');
-      doc.text('Learn. Build. Get Hired.', 56, 88);
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(ink);
-      const contacts = [
-        '+91 89038 56835',
-        'www.internalai.in',
-        'contact@internalai.in',
-        'Santhosapuram, Chennai - 600073',
-      ];
-      contacts.forEach((line, index) => {
-        const y = 36 + index * 17;
-        doc.setFillColor(purple);
-        doc.circle(pageWidth - 176, y - 3, 5, 'F');
-        doc.setTextColor(ink);
-        doc.text(line, pageWidth - 160, y);
-      });
-
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.text('InternJourneys AI Solutions', pageWidth - 176, 168);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(muted);
-      doc.text('Santhosapuram Main Road, Chennai', pageWidth - 218, 184);
-      doc.text('Tamil Nadu, India', pageWidth - 166, 198);
-      doc.text('www.internalai.in', pageWidth - 156, 212);
-      doc.setTextColor(ink);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Date: ${today}`, pageWidth - 176, 236);
-      doc.text(`ID: ${letterId}`, pageWidth - 176, 252);
-
-      doc.setFontSize(15);
-      doc.setTextColor('#0F172A');
-      doc.text('INTERNSHIP OFFER LETTER', pageWidth / 2, 295, { align: 'center' });
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10.5);
-      doc.setTextColor(ink);
-      let y = 330;
-      const left = 42;
-      const maxWidth = pageWidth - 84;
-
-      const paragraphs = [
-        `Dear ${user.name},`,
-        `We are pleased to offer you the position of ${role} at InternJourneys. We are delighted to welcome you to our internship program and look forward to supporting your learning and professional development.`,
-        `This ${duration} internship is designed to provide practical industry exposure, hands-on project experience, and an opportunity to enhance your technical and professional skills through structured learning and real-world assignments.`,
-        'You are required to log in to the InternJourneys Internship Portal to access your dashboard, complete the assigned tasks, submit your work, and track your internship progress. We encourage you to complete all assigned activities with dedication and maintain professional conduct throughout the program.',
-        'Upon successful completion of all assigned tasks and internship requirements, you will be awarded an Internship Completion Certificate in recognition of your successful participation and accomplishments.',
-        'We are confident that this internship will be a valuable step in your professional journey and wish you a rewarding learning experience with InternJourneys.',
-      ];
-
-      paragraphs.forEach((paragraph, index) => {
-        if (index === 0) {
-          doc.setFont('helvetica', 'bold');
-          doc.text(paragraph, left, y);
-          doc.setFont('helvetica', 'normal');
-          y += 24;
-          return;
-        }
-        const lines = doc.splitTextToSize(paragraph, maxWidth);
-        doc.text(lines, left, y, { align: 'justify', maxWidth });
-        y += lines.length * 15 + 14;
-      });
-
-      doc.setDrawColor(248, 231, 241);
-      doc.setLineWidth(34);
-      doc.circle(pageWidth - 95, 540, 94, 'S');
-      doc.setLineWidth(1);
-      doc.setDrawColor(248, 231, 241);
-      for (let index = 0; index < 8; index += 1) {
-        const angle = (Math.PI * 2 * index) / 8;
-        const x1 = pageWidth - 95 + Math.cos(angle) * 30;
-        const y1 = 540 + Math.sin(angle) * 30;
-        const x2 = pageWidth - 95 + Math.cos(angle) * 86;
-        const y2 = 540 + Math.sin(angle) * 86;
-        doc.line(x1, y1, x2, y2);
-        doc.circle(x2, y2, 5, 'S');
-      }
-
-      doc.setTextColor(ink);
-      doc.setFontSize(10);
-      doc.text('Best Regards,', left, 705);
-      doc.setFont('times', 'italic');
-      doc.setFontSize(20);
-      doc.text('Nikhil Aji', left + 10, 752);
-      doc.setDrawColor(ink);
-      doc.setLineWidth(0.6);
-      doc.line(left + 8, 758, left + 82, 758);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.text('Program Coordinator', left, 776);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(muted);
-      doc.text('InternJourneys', left, 790);
-
-      doc.setDrawColor('#334155');
-      doc.setTextColor('#334155');
-      doc.circle(pageWidth - 228, 754, 28, 'S');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(6);
-      doc.text('INTERNJOURNEYS', pageWidth - 251, 748);
-      doc.text('VERIFIED SEAL', pageWidth - 249, 759);
-      doc.setFontSize(5);
-      doc.text('Chennai', pageWidth - 239, 770);
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(22);
-      doc.setTextColor('#7C4A12');
-      doc.text('TRUST', pageWidth - 130, 750, { align: 'center' });
-      doc.setFontSize(8);
-      doc.setTextColor('#111827');
-      doc.text('MSME REGISTERED', pageWidth - 130, 768, { align: 'center' });
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(6);
-      doc.text('Structured Training & Internship Initiative', pageWidth - 130, 779, { align: 'center' });
-
-      doc.setDrawColor(purple);
-      doc.setLineWidth(2);
-      doc.line(0, pageHeight - 24, pageWidth, pageHeight - 24);
-      doc.setTextColor(muted);
-      doc.setFontSize(7);
-      doc.text('Web Development   |   App Development   |   Digital Solutions   |   IT Consulting   |   Training & Internships', pageWidth / 2, pageHeight - 10, { align: 'center' });
-
-      doc.save(`InternJourneys_Offer_Letter_${user.internId}.pdf`);
-    } catch (err: any) {
-      alert(err.message || 'Error downloading offer letter PDF.');
+    } catch (err: unknown) {
+      alert(errorMessage(err, 'Error downloading offer letter PDF.'));
     } finally {
       setDownloading(false);
     }

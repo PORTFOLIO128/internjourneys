@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Logo } from '@/components/common/Logo';
 import { Mail, Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/lib/authContext';
+import { errorMessage } from '@/lib/errorMessage';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,8 +24,8 @@ export default function LoginPage() {
     try {
       const { redirect } = await login({ email, password });
       router.push(redirect);
-    } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+    } catch (err: unknown) {
+      setError(errorMessage(err, 'Login failed. Please check your credentials.'));
       setIsLoading(false);
     }
   };
@@ -124,7 +125,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-xs text-slate-500">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/register" className="font-bold text-indigo-600 hover:underline">
               Create an account
             </Link>

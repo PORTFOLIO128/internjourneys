@@ -77,13 +77,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
+        const enrollmentDomain = Array.isArray(enrollment?.domains)
+          ? enrollment.domains[0]
+          : enrollment?.domains;
 
         setRole('student');
         setUser({
           name: profile.full_name,
           initials: profile.initials || profile.full_name?.slice(0, 2).toUpperCase() || 'CA',
           internId: `CAI-${session.user.id.slice(0, 8).toUpperCase()}`,
-          domain: (enrollment?.domains as any)?.name || 'Not Enrolled',
+          domain: enrollmentDomain?.name || 'Not Enrolled',
           joinedOn: enrollment?.start_date || new Date(session.user.created_at).toLocaleDateString(),
           status: enrollment?.status === 'COMPLETED' ? 'Completed' : 'Active',
           totalInternships: enrollment ? 1 : 0,
@@ -92,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           phone: profile.phone || '',
           college: profile.college || '',
           graduationYear: profile.graduation_year || '',
-          durationWeeks: (enrollment?.domains as any)?.duration_weeks || undefined
+          durationWeeks: enrollmentDomain?.duration_weeks || undefined
         });
       }
       setToken(session.access_token);

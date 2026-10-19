@@ -15,6 +15,7 @@ import {
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { UserProfile } from '@/lib/types';
 import { getAdminStudents, setStudentEnrollmentStatus } from '@/lib/supabase/queries';
+import { errorMessage } from '@/lib/errorMessage';
 
 const statusStyles: Record<UserProfile['status'], string> = {
   Active: 'bg-emerald-100 text-emerald-700 border-emerald-200',
@@ -34,9 +35,9 @@ export default function AdminStudentsPage() {
     try {
       const data = await getAdminStudents();
       if (Array.isArray(data)) setStudents(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Could not fetch students from Supabase:', err);
-      setError(err?.message || 'Could not load students.');
+      setError(errorMessage(err, 'Could not load students.'));
     } finally {
       setLoading(false);
     }
@@ -65,9 +66,9 @@ export default function AdminStudentsPage() {
       if (selected && selected.internId === target.internId) {
         setSelected({ ...selected, status: nextStatus });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to update student status:', err);
-      alert(err?.message || 'Failed to update student status.');
+      alert(errorMessage(err, 'Failed to update student status.'));
     } finally {
       setSavingId(null);
     }

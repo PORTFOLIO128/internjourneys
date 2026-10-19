@@ -13,6 +13,7 @@ import {
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { OfferLetterTemplate } from '@/lib/types';
 import { getIssuedCertificatesAdmin } from '@/lib/supabase/queries';
+import { errorMessage } from '@/lib/errorMessage';
 
 export default function AdminCertificateOfferPage() {
   const [templates, setTemplates] = useState<OfferLetterTemplate[]>([]);
@@ -43,7 +44,7 @@ export default function AdminCertificateOfferPage() {
     try {
       const certificates = await getIssuedCertificatesAdmin();
       if (Array.isArray(certificates) && certificates.length > 0) {
-        const latest = certificates[certificates.length - 1] as any;
+        const latest = certificates[certificates.length - 1];
         const fullName = latest.student_name || '';
         const domainName = latest.domain_name || '';
         if (fullName) setRecipientName(fullName);
@@ -51,9 +52,9 @@ export default function AdminCertificateOfferPage() {
         if (latest.certificate_id) setCertId(latest.certificate_id);
         if (latest.issue_date) setIssueDate(latest.issue_date);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Could not fetch certificate data from Supabase:', err);
-      setError(err?.message || 'Could not load credential data.');
+      setError(errorMessage(err, 'Could not load credential data.'));
     } finally {
       setLoading(false);
     }

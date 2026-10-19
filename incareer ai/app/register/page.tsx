@@ -6,7 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Logo } from '@/components/common/Logo';
 import { useAuth } from '@/lib/authContext';
 import { getActiveDomains } from '@/lib/supabase/queries';
-import { ArrowRight, Lock, AlertCircle } from 'lucide-react';
+import { ArrowRight, AlertCircle } from 'lucide-react';
+import { errorMessage } from '@/lib/errorMessage';
 
 export default function RegisterPage() {
   return (
@@ -87,8 +88,8 @@ function RegisterForm() {
         domain: formData.domain,
       });
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+    } catch (err: unknown) {
+      setError(errorMessage(err, 'Registration failed. Please try again.'));
       setIsLoading(false);
     }
   };

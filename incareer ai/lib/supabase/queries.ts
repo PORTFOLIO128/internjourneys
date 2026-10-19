@@ -147,12 +147,49 @@ export async function upsertAdminTask(task: Partial<TaskRow>) {
   return data as TaskRow;
 }
 
-function unwrap<T>(data: any, fn: string): T {
-  if (data && typeof data === 'object' && fn in data) return data[fn];
+function unwrap<T>(data: unknown, fn: string): T {
+  if (data && typeof data === 'object' && !Array.isArray(data) && fn in data) {
+    return (data as Record<string, unknown>)[fn] as T;
+  }
   return data as T;
 }
 
-function initialsOf(name: string): string {
+interface AdminStudentOverviewRow {
+  id: string;
+  full_name: string | null;
+  initials: string | null;
+  domain: string | null;
+  start_date: string | null;
+  enrollment_status: string | null;
+  email: string | null;
+  phone: string | null;
+  college: string | null;
+  graduation_year: string | null;
+}
+
+interface AdminSubmissionOverviewRow {
+  id: string;
+  student_name: string | null;
+  email: string | null;
+  task_title: string | null;
+  domain_name: string | null;
+  submitted_at: string | null;
+  status: string;
+}
+
+interface AdminPaymentOverviewRow {
+  id: string;
+  student_name: string | null;
+  purpose: string | null;
+  amount: number | string | null;
+  currency: string | null;
+  status: string | null;
+  created_at: string | null;
+  provider_payment_id: string | null;
+  provider_order_id: string | null;
+}
+
+function initialsOf(name: string | null): string {
   return (name || '').split(' ').map(w => w[0]).filter(Boolean).join('').slice(0, 2).toUpperCase() || 'ST';
 }
 
@@ -178,8 +215,9 @@ export async function getAdminPlatformStats(): Promise<PlatformStats> {
 export async function getAdminStudents(): Promise<UserProfile[]> {
   const { data, error } = await supabase.rpc('admin_student_overview');
   if (error) throw error;
-  const rows = unwrap<any[]>(data, 'admin_student_overview');
-  return (rows || []).map((r: any) => ({
+  const rows = unwrap<AdminStudentOverviewRow[] | null>(data, 'admin_student_overview') || [];
+
+  return rows.map((r) => ({
     id: r.id,
     name: r.full_name || 'Student',
     initials: r.initials || initialsOf(r.full_name),
@@ -210,8 +248,8 @@ export async function setStudentEnrollmentStatus(userId: string, active: boolean
 export async function getAdminSubmissions(): Promise<InternshipApplication[]> {
   const { data, error } = await supabase.rpc('admin_submission_overview');
   if (error) throw error;
-  const rows = unwrap<any[]>(data, 'admin_submission_overview');
-  return (rows || []).map((r: any) => ({
+  const rows = unwrap<AdminSubmissionOverviewRow[] | null>(data, 'admin_submission_overview') || [];
+  return rows.map((r) => ({
     id: r.id,
     studentName: r.student_name || 'Student',
     studentInitials: initialsOf(r.student_name),
@@ -234,15 +272,17 @@ export async function reviewSubmission(studentTaskId: string, approved: boolean,
 export async function getAdminPayments(): Promise<AdminPayment[]> {
   const { data, error } = await supabase.rpc('admin_payment_overview');
   if (error) throw error;
-  const rows = unwrap<any[]>(data, 'admin_payment_overview');
-  return (rows || []).map((r: any) => ({
+  const rows = unwrap<AdminPaymentOverviewRow[] | null>(data, 'admin_payment_overview') || [];
+  return rows.map((r) => ({
     id: r.id,
     studentName: r.student_name || 'Student',
     internId: `CAI-${'X'}`,
     purpose: r.purpose || '',
     amount: Number(r.amount) || 0,
     currency: r.currency || 'INR',
-    status: (r.status || 'Pending') as AdminPayment['status'],
+    status: r.status === 'Completed' || r.status === 'Failed' || r.status === 'Refunded'
+      ? r.status
+      : 'Pending',
     date: r.created_at ? new Date(r.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
     transactionId: r.provider_payment_id || r.provider_order_id || undefined,
   }));

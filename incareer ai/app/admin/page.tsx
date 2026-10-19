@@ -16,6 +16,7 @@ import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { StatCard } from '@/components/admin/StatCard';
 import { getAdminPlatformStats } from '@/lib/supabase/queries';
 import type { PlatformStats } from '@/lib/types';
+import { errorMessage } from '@/lib/errorMessage';
 
 const emptyStats: PlatformStats = {
   totalStudents: 0,
@@ -40,9 +41,9 @@ export default function AdminDashboardPage() {
       try {
         const data = await getAdminPlatformStats();
         if (data) setStats({ ...emptyStats, ...data });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to load admin stats:', err);
-        setError(err?.message || 'Could not load dashboard statistics.');
+        setError(errorMessage(err, 'Could not load dashboard statistics.'));
       } finally {
         setLoading(false);
       }
