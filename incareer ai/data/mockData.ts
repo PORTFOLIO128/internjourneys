@@ -23,7 +23,7 @@ export const mockTasks: Task[] = [
     dueDate: "Immediate Submission",
     status: "Completed",
     submittedOnTrack: true,
-    description: "Download your offer letter, post it on LinkedIn tagging careerai, and share the post URL here.",
+    description: "Download your offer letter, post it on LinkedIn tagging InternJourneys, and share the post URL here.",
     iconType: "linkedin",
     bottomStatusText: "Completed Successfully!",
     submissionUrl: "https://linkedin.com/posts/harinarayan-offer-letter-cai45872"
@@ -110,11 +110,7 @@ export const mockTasks: Task[] = [
     dueDate: "Available",
     status: "Available",
     isCertificateTask: true,
-    paymentRequired: true,
-    description: "Post your verified certificate on LinkedIn tagging careerai.",
-    paymentWarning: "Payment Required to Submit",
-    paymentDescription: "You must complete the payment before you can submit the Certificate task.",
-    bottomCtaText: "Go to Payment Tab",
+    description: "Post your verified certificate on LinkedIn tagging InternJourneys.",
     iconType: "cert"
   }
 ];
@@ -226,9 +222,9 @@ export const mockDomains: InternshipDomain[] = [
 
 export const mockPayment: PaymentItem = {
   id: "pay_100",
-  title: "Internship Task Review & Certificate Processing",
-  purpose: "Internship Task Review & Certificate Processing",
-  amount: 100,
+  title: "Certificate Processing Fee",
+  purpose: "Certificate fee",
+  amount: 199,
   currency: "INR",
   status: "Pending",
   dueDate: "Immediate"

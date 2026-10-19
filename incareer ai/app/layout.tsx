@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
+import { AuthProvider } from '@/lib/authContext';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -15,8 +16,13 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: 'CareerAI — Virtual Internships That Build Real Skills',
-  description: 'Discover structured virtual internships, build real-world projects, and earn verified career credentials with CareerAI.',
+  title: 'InternJourneys — Virtual Internships That Build Real Skills',
+  description: 'Explore structured virtual internships, project-based learning tasks, and certificates with online verification through InternJourneys.',
+  icons: {
+    icon: '/assets/internjourneys-monogram.png',
+    shortcut: '/assets/internjourneys-monogram.png',
+    apple: '/assets/internjourneys-monogram.png',
+  },
 };
 
 export default function RootLayout({
@@ -27,7 +33,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${jakarta.variable} ${cormorant.variable} ${jakarta.className} min-h-screen bg-background text-slate-900 antialiased`}>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

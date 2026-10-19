@@ -1,13 +1,114 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardNavbar } from '@/components/layout/DashboardNavbar';
-import { mockUser, mockCertificate } from '@/data/mockData';
-import { Award, ShieldCheck, Linkedin, Download, AlertTriangle, ExternalLink, CheckCircle2, Lock } from 'lucide-react';
+import { CertificateData } from '@/lib/types';
+import { Award, ShieldCheck, Download, AlertTriangle, Lock, Loader2, ArrowRight, IndianRupee, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/authContext';
+import { supabase } from '@/lib/supabase/client';
+import { issueCertificateForCurrentStudent } from '@/lib/supabase/queries';
+import { certificateFileName, generateCertificate } from '@/utils/certificateGenerator';
+import type { StudentCertificateAccess } from '@/lib/types';
+import certificateTemplate from '@/assets/finalcert.png';
+
+function errorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+    return error.message;
+  }
+  return fallback;
+}
 
 export default function CertificationsPage() {
-  const [isPaid, setIsPaid] = useState(false); // Can be unlocked via payments page
+  const { user: authUser } = useAuth();
+  const [certificate, setCertificate] = useState<CertificateData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [downloading, setDownloading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [generatingPreview, setGeneratingPreview] = useState(false);
+  const [access, setAccess] = useState<StudentCertificateAccess | null>(null);
+
+  const fetchCertData = async () => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error('Please sign in to view your certificate.');
+
+      const result = await issueCertificateForCurrentStudent();
+      setAccess(result);
+      if (!result.eligible || !result.certificate) {
+        setCertificate(null);
+        setPreviewUrl('');
+        setLoadError('');
+        return;
+      }
+
+      const data = result.certificate;
+      setCertificate({
+        id: data.id,
+        certId: data.certificate_id,
+        studentName: data.student_name || authUser?.name || 'Student',
+        program: `${data.domain_name || authUser?.domain || 'Internship'} Internship`,
+        issueDate: data.issue_date || 'Pending',
+        status: data.status === 'ISSUED' ? 'Verified' : 'Pending Payment',
+        endDate: data.end_date || undefined,
+        verificationUrl: data.verification_url || `${window.location.origin}/verify/${data.certificate_id}`,
+        pdfUrl: data.file_path || undefined
+      });
+      setPreviewUrl('');
+      setLoadError('');
+    } catch (err: unknown) {
+      console.warn('Error loading certificate info:', err);
+      setLoadError(errorMessage(err, 'Could not load your certificate.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCertData();
+  }, []);
+
+  const isVerified = certificate?.status === 'Verified' && access?.eligible === true;
+
+  const createCertificateCanvas = async () => {
+    if (!certificate) throw new Error('Certificate data is not available.');
+    return generateCertificate(certificateTemplate.src, {
+      studentName: certificate.studentName,
+      domainName: certificate.program.replace(/\s+Internship$/, ''),
+      issueDate: certificate.issueDate,
+      certificateId: certificate.certId,
+      verificationUrl: certificate.verificationUrl,
+    });
+  };
+
+  const handlePreview = async () => {
+    try {
+      setGeneratingPreview(true);
+      const canvas = await createCertificateCanvas();
+      setPreviewUrl(canvas.toDataURL('image/png'));
+    } catch (err: unknown) {
+      setLoadError(errorMessage(err, 'Could not generate certificate preview.'));
+    } finally {
+      setGeneratingPreview(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      setDownloading(true);
+      const canvas = await createCertificateCanvas();
+      const link = document.createElement('a');
+      link.download = certificateFileName(certificate?.studentName || 'Student');
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err: unknown) {
+      alert(errorMessage(err, 'Could not download certificate image.'));
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-slate-900 font-sans flex flex-col antialiased">
@@ -26,151 +127,144 @@ export default function CertificationsPage() {
               Certifications & Credential Center
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-medium">
-              View your verified internship certificate, share credentials on LinkedIn, and verify authenticity.
+              Preview and download your internship completion certificate.
             </p>
           </div>
         </div>
 
-        {/* Payment Warning Notice if not paid */}
-        {!isPaid && (
-          <div className="p-6 rounded-3xl bg-amber-50 border border-amber-200/90 text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-600 shrink-0">
-                <AlertTriangle className="w-6 h-6" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-amber-900">Task Review & Certificate Fee Pending</h3>
-                <p className="text-xs text-amber-800 leading-relaxed">
-                  Your internship tasks are 100% completed! To issue your verified certificate PDF and unlock LinkedIn sharing, please process the nominal review fee of ₹100.
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/dashboard/payments"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold text-xs shadow-md whitespace-nowrap transition-all"
-            >
-              <span>Pay & Unlock Certificate</span>
-              <ExternalLink className="w-4 h-4" />
-            </Link>
+        {/* Loading state */}
+        {loading && (
+          <div className="bg-white p-12 rounded-3xl border border-slate-200/90 shadow-card flex flex-col items-center justify-center gap-3 text-center">
+            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mx-auto" />
+            <p className="text-xs font-semibold text-slate-600">Loading your credential...</p>
           </div>
         )}
 
-        {/* Certificate Card Mock Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Certificate Frame Display */}
-          <div className="lg:col-span-8 bg-white p-8 sm:p-12 rounded-3xl border-2 border-indigo-100 shadow-2xl relative overflow-hidden">
-            
-            {/* Watermark / Background Ornament */}
-            <div className="absolute -top-16 -right-16 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-60 pointer-events-none" />
+        {!loading && loadError && !certificate && (
+          <div className="bg-white p-12 rounded-3xl border border-slate-200/90 shadow-card flex flex-col items-center justify-center gap-3 text-center">
+            <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto" />
+            <p className="text-xs font-semibold text-slate-600">{loadError}</p>
+            <button
+              onClick={() => { setLoading(true); setLoadError(''); fetchCertData(); }}
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
 
-            <div className="relative border-4 border-indigo-900/10 p-8 rounded-2xl space-y-8 text-center bg-gradient-to-b from-white to-slate-50/50">
-              
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-200 pb-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
-                    CA
-                  </div>
-                  <span className="text-lg font-bold tracking-tight text-slate-900">
-                    career<span className="text-indigo-600">ai</span>
-                  </span>
+        {!loading && !loadError && !certificate && access && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-8 rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-card">
+              <div className="aspect-[1456/1024] w-full rounded-xl border border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-3 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-600 border border-amber-200">
+                  <Lock className="h-7 w-7" />
                 </div>
-                <div className="flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-                  <ShieldCheck className="w-4 h-4 text-indigo-600" />
-                  <span>VERIFIED CERTIFICATE</span>
-                </div>
-              </div>
-
-              {/* Body */}
-              <div className="space-y-4 py-4">
-                <p className="text-xs uppercase tracking-widest font-extrabold text-slate-400">
-                  Certificate of Internship Completion
+                <h2 className="text-lg font-bold text-slate-900">Certificate Locked</h2>
+                <p className="max-w-md px-4 text-sm text-slate-600">
+                  {access.reason === 'tasks_incomplete'
+                    ? 'Payment received. Complete all required internship tasks to unlock your certificate.'
+                    : access.reason === 'enrollment_required'
+                      ? 'Enroll in an internship to become eligible for a completion certificate.'
+                      : access.reason === 'certificate_revoked'
+                        ? 'This certificate is no longer available. Contact support for assistance.'
+                        : 'Pay the certificate fee to unlock your certificate. Required internship tasks must also be completed.'}
                 </p>
-                <p className="text-xs text-slate-500">This is proudly presented to</p>
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight underline decoration-indigo-500 underline-offset-8">
-                  {mockUser.name}
-                </h2>
-                <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed pt-2">
-                  for successfully completing the intensive 4-week virtual internship in <strong>{mockUser.domain}</strong> and delivering all required industry-grade software projects.
-                </p>
-              </div>
-
-              {/* Certificate Metadata Footer */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6 text-xs text-slate-500">
-                <div className="text-left space-y-1">
-                  <p className="font-semibold text-slate-700">Certificate ID: <span className="font-mono text-indigo-600 font-bold">{mockCertificate.certId}</span></p>
-                  <p>Issue Date: <strong>{mockCertificate.issueDate}</strong></p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-xl bg-slate-900 text-white p-2 flex flex-col items-center justify-center text-[9px] font-mono text-center leading-tight">
-                    <span>QR</span>
-                    <span>VERIFY</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Overlay Lock blur if not paid */}
-              {!isPaid && (
-                <div className="absolute inset-0 bg-white/75 backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center z-10">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mb-3 shadow-md">
-                    <Lock className="w-7 h-7" />
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-900">Certificate Locked</h3>
-                  <p className="text-xs text-slate-600 max-w-xs mt-1 mb-4">
-                    Complete the task review payment to download high-resolution PDF & share directly on LinkedIn.
+                {access.required_task_count > 0 && access.reason !== 'certificate_revoked' && (
+                  <p className="text-xs font-semibold text-slate-500">
+                    {access.verified_task_count} of {access.required_task_count} required tasks verified
                   </p>
-                  <Link
-                    href="/dashboard/payments"
-                    className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors"
-                  >
-                    Go to Payments (₹100)
-                  </Link>
-                </div>
-              )}
-            </div>
-
-          </div>
-
-          {/* Certificate Actions Sidebar */}
-          <div className="lg:col-span-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-card space-y-6">
-            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
-              Certificate Actions
-            </h3>
-
-            {/* Verification Link */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
-                Verification Link
-              </label>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-mono text-indigo-600 break-all">
-                {mockCertificate.verificationUrl}
+                )}
               </div>
             </div>
 
-            {/* Buttons */}
-            <div className="space-y-3 pt-2">
-              <button
-                disabled={!isPaid}
-                onClick={() => alert("Downloading verified PDF certificate...")}
-                className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                <span>Download High-Res PDF</span>
-              </button>
-
-              <button
-                disabled={!isPaid}
-                onClick={() => window.open("https://linkedin.com", "_blank")}
-                className="w-full py-3 px-4 rounded-xl bg-[#0A66C2] hover:bg-[#084e96] disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
-              >
-                <Linkedin className="w-4 h-4 fill-white" />
-                <span>Share Certificate on LinkedIn</span>
-              </button>
-            </div>
+            <aside className="lg:col-span-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-card space-y-5">
+              <h2 className="text-lg font-bold text-slate-900">Unlock Certificate</h2>
+              {access.reason === 'tasks_incomplete' ? (
+                <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+                  <p className="text-sm font-semibold">Payment received. Finish your required tasks to unlock the certificate.</p>
+                </div>
+              ) : access.reason === 'enrollment_required' ? (
+                <Link
+                  href="/internships"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-700"
+                >
+                  <span>Explore Internships</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              ) : access.reason === 'certificate_revoked' ? (
+                <Link href="/help" className="text-sm font-bold text-indigo-600 hover:text-indigo-700">Contact support</Link>
+              ) : (
+                <>
+                  <p className="text-sm text-slate-600">Pay ₹199. Your certificate unlocks after payment and verification of all required tasks.</p>
+                  <Link
+                    href="/dashboard/payments?purpose=certificate"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-700"
+                  >
+                    <IndianRupee className="h-4 w-4" />
+                    <span>Pay Now · ₹199</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </>
+              )}
+            </aside>
           </div>
+        )}
 
-        </div>
+        {!loading && certificate && (
+          <>
+
+          {/* Certificate Card Preview */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <div className="lg:col-span-8 bg-white p-4 sm:p-6 rounded-3xl border-2 border-indigo-100 shadow-2xl">
+              <div className="aspect-[1456/1024] w-full overflow-hidden rounded-xl bg-slate-100">
+                {previewUrl ? <img src={previewUrl} alt="Generated internship certificate" className="h-full w-full object-contain" /> : <div className="flex h-full items-center justify-center text-center text-sm font-semibold text-slate-500">Select Preview Certificate to generate your certificate.</div>}
+              </div>
+            </div>
+
+            {/* Certificate Actions Sidebar */}
+            <div className="lg:col-span-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-card space-y-6">
+              <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
+                Certificate Actions
+              </h3>
+
+              {/* Verification Link */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Verification Link
+                </label>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-mono text-indigo-600 break-all">
+                  {certificate.verificationUrl}
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="space-y-3 pt-2">
+                <button
+                  disabled={!isVerified || generatingPreview}
+                  onClick={handlePreview}
+                  className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
+                >
+                  {generatingPreview ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                  <span>{generatingPreview ? 'Generating Preview...' : 'Preview Certificate'}</span>
+                </button>
+                <button
+                  disabled={!isVerified || downloading}
+                  onClick={handleDownload}
+                  className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
+                >
+                  {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                  <span>{downloading ? 'Generating PNG...' : 'Download Certificate'}</span>
+                </button>
+
+              </div>
+            </div>
+
+          </div>
+          </>
+        )}
 
       </main>
     </div>

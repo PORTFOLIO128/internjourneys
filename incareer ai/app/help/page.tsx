@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { DashboardNavbar } from '@/components/layout/DashboardNavbar';
-import { HelpCircle, Search, MessageSquare, Mail, ChevronDown, ChevronUp } from 'lucide-react';
+import { HelpCircle, Search, Mail, ChevronDown, ChevronUp } from 'lucide-react';
 
 const faqs = [
   {
@@ -10,16 +10,16 @@ const faqs = [
     a: "Click on any active task card in your Quest Log or Tasks tab to open the Task Detail Modal. Input your GitHub/project repository URL or drag & drop files and click 'Submit Work'."
   },
   {
-    q: "Why does the Certificate task show 'Payment Required'?",
-    a: "To process manual code review, verify your credentials, and issue your official PDF certificate, a nominal ₹100 processing fee is required. Once paid, the certificate task unlocks immediately."
+    q: "What do I need to access my certificate?",
+    a: "Pay the ₹199 certificate fee and complete all required internship tasks to unlock your certificate in the Certifications tab."
   },
   {
     q: "How can I share my certificate on LinkedIn?",
-    a: "After completing your payment and task submission, visit the Certifications tab. You will find a direct 'Share Certificate on LinkedIn' button with pre-formatted text and tag @careerai."
+    a: "Visit the Certifications tab to preview your certificate, download it, or share it on LinkedIn."
   },
   {
     q: "What should I do if I missed a task due date?",
-    a: "CareerAI virtual internships feature flexible pacing! You can submit tasks even after the suggested due date without penalty."
+    a: "InternJourneys virtual internships feature flexible pacing! You can submit tasks even after the suggested due date without penalty."
   },
   {
     q: "Where can I download my official Offer Letter?",
@@ -111,11 +111,11 @@ export default function HelpPage() {
             </div>
             <div>
               <h3 className="text-base font-bold">Still need assistance?</h3>
-              <p className="text-xs text-indigo-200">Our student support team responds within 24 hours.</p>
+              <p className="text-xs text-indigo-200">Email us with your question and relevant account details.</p>
             </div>
           </div>
           <a
-            href="mailto:support@careerai.in"
+            href="mailto:internjourney26@gmail.com"
             className="px-5 py-2.5 rounded-xl bg-white text-slate-900 font-bold text-xs hover:bg-slate-100 transition-colors"
           >
             Contact Support

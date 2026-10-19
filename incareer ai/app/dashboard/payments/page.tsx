@@ -1,20 +1,135 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { DashboardNavbar } from '@/components/layout/DashboardNavbar';
-import { mockPayment } from '@/data/mockData';
-import { CreditCard, AlertTriangle, CheckCircle2, ShieldCheck, ArrowRight, Receipt, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CreditCard, IndianRupee, Loader2, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+import { useAuth } from '@/lib/authContext';
+import { supabase } from '@/lib/supabase/client';
+
+interface CashfreeOrderResponse {
+  orderId: string;
+  paymentSessionId: string;
+}
+
+interface CashfreeCheckout {
+  checkout(options: {
+    paymentSessionId: string;
+    redirectTarget: '_modal';
+  }): Promise<unknown>;
+}
+
+declare global {
+  interface Window {
+    Cashfree?: (options: { mode: 'sandbox' }) => CashfreeCheckout;
+  }
+}
+
+function loadCashfreeCheckout() {
+  if (window.Cashfree) return Promise.resolve(true);
+
+  return new Promise<boolean>((resolve) => {
+    const existingScript = document.querySelector<HTMLScriptElement>('script[data-cashfree-checkout]');
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve(Boolean(window.Cashfree)), { once: true });
+      existingScript.addEventListener('error', () => resolve(false), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+    script.async = true;
+    script.dataset.cashfreeCheckout = 'true';
+    script.onload = () => resolve(Boolean(window.Cashfree));
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
+async function verifyPayment(orderId: string, accessToken: string) {
+  const response = await fetch('/api/payments/verify', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ orderId }),
+  });
+  const result = await response.json() as { error?: string };
+  if (!response.ok) throw new Error(result.error || 'Cashfree has not confirmed payment yet.');
+}
 
 export default function PaymentsPage() {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const router = useRouter();
+  const { user } = useAuth();
+  const returnVerificationStarted = useRef(false);
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
-  const handlePay = () => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsCompleted(true);
-    }, 1500);
+  useEffect(() => {
+    const orderId = new URLSearchParams(window.location.search).get('order_id');
+    if (!orderId || returnVerificationStarted.current) return;
+    returnVerificationStarted.current = true;
+
+    const verifyReturnedOrder = async () => {
+      setProcessing(true);
+      setError('');
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session) throw new Error('Please sign in again to confirm your payment.');
+        await verifyPayment(orderId, session.access_token);
+        setMessage('Payment confirmed. Checking your certificate eligibility...');
+        router.replace('/dashboard/certifications');
+        router.refresh();
+      } catch (verificationError) {
+        setError(verificationError instanceof Error ? verificationError.message : 'Could not confirm payment.');
+      } finally {
+        setProcessing(false);
+      }
+    };
+
+    void verifyReturnedOrder();
+  }, [router]);
+
+  const startPayment = async () => {
+    setProcessing(true);
+    setError('');
+    setMessage('');
+
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) throw new Error('Please sign in again to continue.');
+
+      const orderResponse = await fetch('/api/payments/create-order', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const order = await orderResponse.json() as CashfreeOrderResponse & { error?: string };
+      if (!orderResponse.ok) throw new Error(order.error || 'Could not start payment.');
+
+      const scriptLoaded = await loadCashfreeCheckout();
+      if (!scriptLoaded || !window.Cashfree) {
+        throw new Error('Payment checkout could not be loaded. Please try again.');
+      }
+
+      const cashfree = window.Cashfree({ mode: 'sandbox' });
+      await cashfree.checkout({
+        paymentSessionId: order.paymentSessionId,
+        redirectTarget: '_modal',
+      });
+
+      await verifyPayment(order.orderId, session.access_token);
+
+      setMessage('Payment confirmed. Checking your certificate eligibility...');
+      router.replace('/dashboard/certifications');
+      router.refresh();
+    } catch (paymentError) {
+      setError(paymentError instanceof Error ? paymentError.message : 'Could not confirm payment.');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
@@ -22,127 +137,60 @@ export default function PaymentsPage() {
       <DashboardNavbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-card">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-              <CreditCard className="w-3.5 h-3.5" />
-              <span>Payments & Invoices</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Payment Dashboard
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium">
-              Manage internship processing fees, task review invoices, and certification payments.
-            </p>
-          </div>
-        </div>
+        <div className="max-w-3xl space-y-6">
+          <Link href="/dashboard/certifications" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-indigo-600">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to certificate</span>
+          </Link>
 
-        {/* Current Pending Invoice Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          <div className="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-card space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-indigo-600" />
-                <span>Pending Payment Overview</span>
-              </h2>
-              {isCompleted ? (
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Paid
-                </span>
-              ) : (
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" /> Pending
-                </span>
-              )}
-            </div>
-
-            {/* Warning Banner matching Certificate card */}
-            {!isCompleted && (
-              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-900 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-amber-800">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>Payment Required to Submit Certificate Task</span>
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
+            <div className="border-b border-slate-200 bg-slate-50 px-6 py-5 sm:px-8">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                  <CreditCard className="h-5 w-5" />
                 </div>
-                <p className="text-xs text-amber-800 leading-relaxed">
-                  You must complete the payment of ₹100 before you can submit the Certificate task and download your verified credentials.
+                <div>
+                  <h1 className="text-xl font-extrabold text-slate-900">Certificate payment</h1>
+                  <p className="text-sm text-slate-500">Secure sandbox checkout powered by Cashfree</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6 p-6 sm:p-8">
+              <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                <div>
+                  <p className="text-sm font-bold text-slate-900">Internship completion certificate</p>
+                  <p className="mt-1 text-xs text-slate-500">One-time certificate processing fee</p>
+                </div>
+                <p className="flex shrink-0 items-center text-2xl font-extrabold text-slate-900">
+                  <IndianRupee className="h-5 w-5" />199
                 </p>
               </div>
-            )}
 
-            {/* Line items table */}
-            <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-slate-900">{mockPayment.title}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Includes manual project code review, verified badge, and digital ID certificate.</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-extrabold text-slate-900">₹{mockPayment.amount}</p>
-                  <p className="text-[11px] text-slate-400 font-semibold">One-time processing fee</p>
-                </div>
+              <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
+                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
+                <p className="text-sm font-medium">Preview and download become available after server verification of payment and all required internship tasks.</p>
               </div>
-            </div>
+              <p className="text-xs leading-5 text-slate-500">
+                By continuing, you acknowledge our <Link href="/terms-and-conditions" className="font-semibold text-indigo-600 hover:underline">Terms & Conditions</Link> and <Link href="/refund-policy" className="font-semibold text-indigo-600 hover:underline">Refund Policy</Link>. Read our <Link href="/privacy-policy" className="font-semibold text-indigo-600 hover:underline">Privacy Policy</Link>.
+              </p>
 
-            {/* Security Guarantee */}
-            <div className="flex items-center gap-3 pt-2 text-xs text-slate-500 font-medium">
-              <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
-              <span>Encrypted SSL 256-bit secure mock checkout via UPI, Cards, Netbanking.</span>
-            </div>
-          </div>
+              {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-700">{error}</p>}
+              {message && <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-700">{message}</p>}
 
-          {/* Checkout Action Box */}
-          <div className="lg:col-span-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-card space-y-6">
-            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
-              Order Summary
-            </h3>
-
-            <div className="space-y-3 text-xs">
-              <div className="flex justify-between text-slate-600">
-                <span>Task Review Fee</span>
-                <span className="font-semibold text-slate-900">₹100</span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>GST / Taxes</span>
-                <span className="font-semibold text-slate-900">₹0</span>
-              </div>
-              <div className="border-t border-slate-100 pt-3 flex justify-between text-sm font-bold text-slate-900">
-                <span>Total Amount Due</span>
-                <span className="text-indigo-600 font-extrabold text-lg">₹100</span>
-              </div>
-            </div>
-
-            {isCompleted ? (
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-2">
-                <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                <p className="text-sm font-bold text-emerald-900">Payment Successful!</p>
-                <p className="text-xs text-emerald-700">Certificate task is now unlocked for submission.</p>
-              </div>
-            ) : (
               <button
-                onClick={handlePay}
-                disabled={isProcessing}
-                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md disabled:opacity-50 transition-all"
+                type="button"
+                onClick={startPayment}
+                disabled={processing}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-bold text-white transition-colors hover:bg-indigo-700 disabled:cursor-wait disabled:opacity-60"
               >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Processing UPI Payment...</span>
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-4 h-4" />
-                    <span>Pay ₹100 Now</span>
-                  </>
-                )}
+                {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <IndianRupee className="h-4 w-4" />}
+                <span>{processing ? 'Processing...' : `Pay ₹199${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}</span>
+                {!processing && <ArrowRight className="h-4 w-4" />}
               </button>
-            )}
-          </div>
-
+            </div>
+          </section>
         </div>
-
       </main>
     </div>
   );

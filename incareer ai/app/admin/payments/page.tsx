@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CreditCard,
   IndianRupee,
@@ -11,9 +11,8 @@ import {
   XCircle,
 } from 'lucide-react';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
-import { adminPayments } from '@/data/adminMockData';
 import { AdminPayment } from '@/lib/types';
-import { adminStats } from '@/data/adminMockData';
+import { getAdminPayments, updatePaymentStatus } from '@/lib/supabase/queries';
 
 type PaymentFilter = 'All' | AdminPayment['status'];
 
@@ -25,9 +24,28 @@ const statusStyles: Record<AdminPayment['status'], string> = {
 };
 
 export default function AdminPaymentsPage() {
-  const [payments, setPayments] = useState<AdminPayment[]>(adminPayments);
+  const [payments, setPayments] = useState<AdminPayment[]>([]);
   const [filter, setFilter] = useState<PaymentFilter>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  const fetchPayments = async () => {
+    try {
+      const data = await getAdminPayments();
+      if (Array.isArray(data)) setPayments(data);
+    } catch (err: any) {
+      console.error('Could not fetch admin payments from Supabase:', err);
+      setError(err?.message || 'Could not load payments.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPayments();
+  }, []);
 
   const filtered = payments.filter((p) => {
     const matchesFilter = filter === 'All' || p.status === filter;
@@ -38,8 +56,17 @@ export default function AdminPaymentsPage() {
     return matchesFilter && matchesSearch;
   });
 
-  const updateStatus = (id: string, status: AdminPayment['status']) => {
-    setPayments((prev) => prev.map((p) => (p.id === id ? { ...p, status } : p)));
+  const updateStatus = async (id: string, status: AdminPayment['status']) => {
+    setSavingId(id);
+    try {
+      await updatePaymentStatus(id, status);
+      setPayments((prev) => prev.map((p) => (p.id === id ? { ...p, status } : p)));
+    } catch (err: any) {
+      console.error('API update payment notice:', err);
+      alert(err?.message || `Could not update payment status to ${status}.`);
+    } finally {
+      setSavingId(null);
+    }
   };
 
   const completedSum = payments
@@ -48,6 +75,8 @@ export default function AdminPaymentsPage() {
   const pendingSum = payments
     .filter((p) => p.status === 'Pending')
     .reduce((sum, p) => sum + p.amount, 0);
+  const totalTransactions = payments.length;
+  const pendingPayments = payments.filter((p) => p.status === 'Pending').length;
 
   const filters: PaymentFilter[] = ['All', 'Completed', 'Pending', 'Failed', 'Refunded'];
 
@@ -73,33 +102,38 @@ export default function AdminPaymentsPage() {
       />
 
       {/* Payment summary */}
+      {error && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
+          {error}
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-card">
           <div className="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 inline-flex">
             <IndianRupee className="w-5 h-5" />
           </div>
-          <div className="mt-3 text-2xl font-extrabold tracking-tight text-emerald-600">₹{completedSum}</div>
-          <div className="text-xs font-semibold text-slate-500 mt-1">Collected (sample)</div>
+          <div className="mt-3 text-2xl font-extrabold tracking-tight text-emerald-600">₹{completedSum.toLocaleString('en-IN')}</div>
+          <div className="text-xs font-semibold text-slate-500 mt-1">Collected Revenue</div>
         </div>
         <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-card">
           <div className="p-2.5 rounded-2xl bg-amber-50 border border-amber-100 text-amber-600 inline-flex">
             <Clock3 className="w-5 h-5" />
           </div>
-          <div className="mt-3 text-2xl font-extrabold tracking-tight text-amber-600">₹{pendingSum}</div>
+          <div className="mt-3 text-2xl font-extrabold tracking-tight text-amber-600">₹{pendingSum.toLocaleString('en-IN')}</div>
           <div className="text-xs font-semibold text-slate-500 mt-1">Outstanding</div>
         </div>
         <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-card">
           <div className="p-2.5 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 inline-flex">
             <CreditCard className="w-5 h-5" />
           </div>
-          <div className="mt-3 text-2xl font-extrabold tracking-tight text-indigo-600">{adminStats.completedPayments}</div>
+          <div className="mt-3 text-2xl font-extrabold tracking-tight text-indigo-600">{totalTransactions}</div>
           <div className="text-xs font-semibold text-slate-500 mt-1">Total Transactions</div>
         </div>
         <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-card">
           <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 text-slate-600 inline-flex">
             <IndianRupee className="w-5 h-5" />
           </div>
-          <div className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900">{adminStats.pendingPayments}</div>
+          <div className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900">{pendingPayments}</div>
           <div className="text-xs font-semibold text-slate-500 mt-1">Pending Payments</div>
         </div>
       </div>
@@ -155,19 +189,24 @@ export default function AdminPaymentsPage() {
                   </td>
                   <td className="py-3.5 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {(p.status === 'Pending' || p.status === 'Failed') && (
+                      {(p.status === 'Pending' || p.status === 'Failed') && p.purpose !== 'Certificate fee' && (
                         <button
                           onClick={() => updateStatus(p.id, 'Completed')}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-colors"
+                          disabled={savingId === p.id}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-colors disabled:opacity-50"
                         >
                           <Check className="w-3.5 h-3.5" />
-                          Mark Paid
+                          {savingId === p.id ? 'Saving...' : 'Mark Paid'}
                         </button>
+                      )}
+                      {(p.status === 'Pending' || p.status === 'Failed') && p.purpose === 'Certificate fee' && (
+                        <span className="text-xs font-medium text-slate-500">Awaiting provider verification</span>
                       )}
                       {p.status === 'Completed' && (
                         <button
                           onClick={() => updateStatus(p.id, 'Refunded')}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition-colors"
+                          disabled={savingId === p.id}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition-colors disabled:opacity-50"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
                           Refund
@@ -176,7 +215,8 @@ export default function AdminPaymentsPage() {
                       {p.status === 'Pending' && (
                         <button
                           onClick={() => updateStatus(p.id, 'Failed')}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                          disabled={savingId === p.id}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors disabled:opacity-50"
                         >
                           <XCircle className="w-3.5 h-3.5" />
                           Mark Failed
@@ -189,7 +229,7 @@ export default function AdminPaymentsPage() {
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={7} className="py-10 text-center text-xs font-medium text-slate-400">
-                    No payments match your filter.
+                    {loading ? 'Loading payments…' : error ? 'Could not load payments.' : 'No payments match your filter.'}
                   </td>
                 </tr>
               )}

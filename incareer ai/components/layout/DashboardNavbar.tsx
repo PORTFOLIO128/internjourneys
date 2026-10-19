@@ -5,29 +5,27 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
-  CalendarDays,
   Award,
   CreditCard,
   User,
   IdCard,
   HelpCircle,
-  Bell,
   ChevronDown,
   Menu,
   X,
   LogOut,
-  Sparkles
 } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
-import { mockUser } from '@/data/mockData';
-import { setLoggedIn } from '@/lib/mockAuth';
+import { useAuth } from '@/lib/authContext';
 
 export const DashboardNavbar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { user: authUser, logout, isLoading } = useAuth();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const currentUser = authUser;
 
   const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -36,7 +34,7 @@ export const DashboardNavbar: React.FC = () => {
   ];
 
   const handleLogout = () => {
-    setLoggedIn(false);
+    logout();
     router.push('/');
   };
 
@@ -73,7 +71,7 @@ export const DashboardNavbar: React.FC = () => {
             })}
           </nav>
 
-          {/* Right: Actions, Notifications & Profile Dropdown */}
+          {/* Right: Actions, Help & Profile Dropdown */}
           <div className="hidden sm:flex items-center space-x-3 sm:space-x-4">
             {/* Help Button */}
             <Link
@@ -85,26 +83,27 @@ export const DashboardNavbar: React.FC = () => {
             </Link>
 
             {/* Profile Dropdown Trigger */}
-            <div className="relative">
-              <button
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2.5 p-1.5 pr-2.5 rounded-full border border-slate-200 hover:border-indigo-200 hover:bg-slate-50 transition-all duration-200"
-              >
-                {/* Avatar with Initials */}
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
-                  {mockUser.initials}
-                </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-              </button>
+            {isLoading ? (
+              <div aria-label="Loading profile" className="h-10 w-14 animate-pulse rounded-full bg-slate-100" />
+            ) : currentUser && (
+              <div className="relative">
+                <button
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2.5 p-1.5 pr-2.5 rounded-full border border-slate-200 hover:border-indigo-200 hover:bg-slate-50 transition-all duration-200"
+                >
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    {currentUser.initials}
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                </button>
 
-              {/* User Menu Popover */}
-              {userDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="px-4 py-2 border-b border-slate-100">
-                    <p className="text-sm font-bold text-slate-900">{mockUser.name}</p>
-                    <p className="text-xs text-slate-500 font-medium truncate">{mockUser.domain}</p>
+                    <p className="text-sm font-bold text-slate-900">{currentUser.name}</p>
+                    <p className="text-xs text-slate-500 font-medium truncate">{currentUser.domain}</p>
                     <span className="inline-block mt-1 text-[10px] font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
-                      ID: {mockUser.internId}
+                      ID: {currentUser.internId}
                     </span>
                   </div>
                   <div className="py-1">
@@ -134,9 +133,10 @@ export const DashboardNavbar: React.FC = () => {
                       Sign Out
                     </button>
                   </div>
-                </div>
-              )}
-            </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Mobile Hamburger Toggle */}
@@ -173,23 +173,27 @@ export const DashboardNavbar: React.FC = () => {
                 );
               })}
             </div>
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between px-2">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
-                  {mockUser.initials}
+            {isLoading ? (
+              <div aria-label="Loading profile" className="mx-2 h-10 animate-pulse rounded-xl bg-slate-100" />
+            ) : currentUser && (
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between px-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                    {currentUser.initials}
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-800">{currentUser.name}</div>
+                    <div className="text-[10px] text-slate-500">{currentUser.internId}</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-800">{mockUser.name}</div>
-                  <div className="text-[10px] text-slate-500">{mockUser.internId}</div>
-                </div>
+                <button
+                  onClick={handleLogout}
+                  className="text-xs font-semibold text-rose-600 px-3 py-1.5 rounded-lg hover:bg-rose-50"
+                >
+                  Sign Out
+                </button>
               </div>
-              <button
-                onClick={handleLogout}
-                className="text-xs font-semibold text-rose-600 px-3 py-1.5 rounded-lg hover:bg-rose-50"
-              >
-                Sign Out
-              </button>
-            </div>
+            )}
           </div>
         )}
       </div>

@@ -1,42 +1,102 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Logo } from '@/components/common/Logo';
-import { setLoggedIn, saveMockUser } from '@/lib/mockAuth';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '@/lib/authContext';
+import { getActiveDomains } from '@/lib/supabase/queries';
+import { ArrowRight, Lock, AlertCircle } from 'lucide-react';
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterFallback />}>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { register } = useAuth();
+  const [domains, setDomains] = useState<{ title: string; slug?: string }[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     college: '',
     graduationYear: '2026',
-    domain: 'Full Stack Development',
+    domain: '',
     password: '',
     confirmPassword: '',
     agree: true,
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchDomains = async () => {
+      try {
+        const data = await getActiveDomains();
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((d) => ({ title: d.name, slug: d.slug }));
+          const requestedDomain = searchParams.get('domain');
+          const selected = mapped.find((d) => d.title === requestedDomain || d.slug === requestedDomain);
+          setDomains(mapped);
+          setFormData((prev) => ({ ...prev, domain: selected?.title || mapped[0]?.title || '' }));
+        }
+      } catch (err) {
+        console.warn('Could not fetch domains from Supabase:', err);
+      }
+    };
+    fetchDomains();
+  }, [searchParams]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveMockUser({
-      name: formData.name || 'Hari Narayan S',
-      email: formData.email || 'hari@example.com',
-      college: formData.college || 'IIT',
-      domain: formData.domain,
-    });
-    setLoggedIn(true);
-    router.push('/dashboard');
+
+    const email = formData.email.trim().toLowerCase();
+    if (!email.endsWith('@gmail.com')) {
+      setError('Please enter a valid Gmail address (must end with @gmail.com).');
+      return;
+    }
+
+    const phoneDigits = formData.phone.replace(/\D/g, '');
+    if (phoneDigits.length !== 10) {
+      setError('Mobile number must be exactly 10 digits.');
+      return;
+    }
+
+    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match. Please re-enter your password.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password || 'careerai123',
+        phone: formData.phone,
+        college: formData.college,
+        graduation_year: formData.graduationYear,
+        domain: formData.domain,
+      });
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background text-slate-900 font-sans flex flex-col justify-center antialiased p-4 sm:p-6 lg:p-8">
       <div className="max-w-3xl w-full mx-auto bg-white rounded-3xl border border-slate-200 shadow-2xl p-8 sm:p-10 space-y-6">
-        
+
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <Logo href="/" />
           <span className="text-xs font-bold text-slate-500">New Intern Registration</span>
@@ -44,12 +104,19 @@ export default function RegisterPage() {
 
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Create your CareerAI Account
+            Create your InternJourneys Account
           </h1>
           <p className="text-xs text-slate-500 font-medium mt-1">
             Enroll in structured virtual internships and start building industry projects today.
           </p>
         </div>
+
+        {error && (
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -70,9 +137,35 @@ export default function RegisterPage() {
               <input
                 type="email"
                 required
-                placeholder="hari@example.com"
+                pattern="[^@]*@gmail\.com"
+                title="Please enter a valid Gmail address ending with @gmail.com"
+                placeholder="hari@gmail.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 text-xs text-slate-900 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 text-xs text-slate-900 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Confirm Password</label>
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 text-xs text-slate-900 outline-none"
               />
             </div>
@@ -82,7 +175,10 @@ export default function RegisterPage() {
               <input
                 type="tel"
                 required
-                placeholder="+91 98765 43210"
+                pattern="[0-9]{10}"
+                maxLength={10}
+                title="Mobile number must be exactly 10 digits"
+                placeholder="9876543210"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 text-xs text-slate-900 outline-none"
@@ -116,20 +212,17 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Preferred Internship Domain</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Internship Domain</label>
               <select
                 value={formData.domain}
                 onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 text-xs text-slate-900 outline-none"
               >
-                <option value="Full Stack Development">Full Stack Development</option>
-                <option value="Frontend Development">Frontend Development</option>
-                <option value="Backend Development">Backend Development</option>
-                <option value="Python Development">Python Development</option>
-                <option value="AI & Machine Learning">AI & Machine Learning</option>
-                <option value="Data Science">Data Science</option>
-                <option value="Cyber Security">Cyber Security</option>
-                <option value="UI/UX Design">UI/UX Design</option>
+                {domains.map((d) => (
+                  <option key={d.slug || d.title} value={d.title || d.slug}>
+                    {d.title || d.slug}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -142,14 +235,17 @@ export default function RegisterPage() {
               onChange={(e) => setFormData({ ...formData, agree: e.target.checked })}
               className="rounded text-indigo-600 focus:ring-indigo-500"
             />
-            <label htmlFor="agree">I agree to the Terms & Privacy Policy</label>
+            <label htmlFor="agree">
+              I agree to the <Link href="/terms-and-conditions" className="font-semibold text-indigo-600 hover:underline">Terms & Conditions</Link> and <Link href="/privacy-policy" className="font-semibold text-indigo-600 hover:underline">Privacy Policy</Link>.
+            </label>
           </div>
 
           <button
             type="submit"
-            className="w-full py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all"
+            disabled={isLoading}
+            className="w-full py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50"
           >
-            <span>Create CareerAI Account</span>
+            <span>{isLoading ? "Creating Account & Generating Offer Letter..." : "Create InternJourneys Account"}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
@@ -161,6 +257,20 @@ export default function RegisterPage() {
           </Link>
         </p>
 
+      </div>
+    </div>
+  );
+}
+
+function RegisterFallback() {
+  return (
+    <div className="min-h-screen bg-background text-slate-900 font-sans flex flex-col justify-center antialiased p-4 sm:p-6 lg:p-8">
+      <div className="max-w-3xl w-full mx-auto bg-white rounded-3xl border border-slate-200 shadow-2xl p-8 sm:p-10 space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <Logo href="/" />
+          <span className="text-xs font-bold text-slate-500">New Intern Registration</span>
+        </div>
+        <div className="text-xs text-slate-500 font-medium">Loading registration...</div>
       </div>
     </div>
   );

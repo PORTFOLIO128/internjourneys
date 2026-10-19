@@ -35,7 +35,7 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
@@ -43,10 +43,10 @@ export const Modal: React.FC<ModalProps> = ({
       />
 
       {/* Modal Dialog Container */}
-      <div className={`relative w-full ${maxWidth} bg-white rounded-2xl shadow-2xl z-10 overflow-hidden border border-slate-100 transform transition-all animate-in fade-in zoom-in-95 duration-200`}>
+      <div className={`relative flex max-h-[calc(100dvh-1.5rem)] w-full ${maxWidth} flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl z-10 transform transition-all animate-in fade-in zoom-in-95 duration-200`}>
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+          <div className="flex shrink-0 items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
             <h3 className="text-lg font-bold text-slate-900">{title}</h3>
             <button
               onClick={onClose}
@@ -59,7 +59,7 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Content */}
-        <div className="p-6">
+        <div className="min-h-0 overflow-y-auto p-4 sm:p-6">
           {!title && (
             <button
               onClick={onClose}

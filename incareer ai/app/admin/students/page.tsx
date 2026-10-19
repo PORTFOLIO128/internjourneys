@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   Search,
@@ -13,8 +13,8 @@ import {
   UserCog,
 } from 'lucide-react';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
-import { adminStudents } from '@/data/adminMockData';
 import { UserProfile } from '@/lib/types';
+import { getAdminStudents, setStudentEnrollmentStatus } from '@/lib/supabase/queries';
 
 const statusStyles: Record<UserProfile['status'], string> = {
   Active: 'bg-emerald-100 text-emerald-700 border-emerald-200',
@@ -23,9 +23,28 @@ const statusStyles: Record<UserProfile['status'], string> = {
 };
 
 export default function AdminStudentsPage() {
-  const [students, setStudents] = useState<UserProfile[]>(adminStudents);
+  const [students, setStudents] = useState<UserProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selected, setSelected] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  const fetchStudents = async () => {
+    try {
+      const data = await getAdminStudents();
+      if (Array.isArray(data)) setStudents(data);
+    } catch (err: any) {
+      console.error('Could not fetch students from Supabase:', err);
+      setError(err?.message || 'Could not load students.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
 
   const filtered = students.filter((s) =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -33,15 +52,25 @@ export default function AdminStudentsPage() {
     s.domain.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const toggleStatus = (internId: string) => {
-    setStudents((prev) =>
-      prev.map((s) =>
-        s.internId === internId
-          ? { ...s, status: s.status === 'Active' ? 'Inactive' : 'Active' }
-          : s
-      )
-    );
-    setSelected((cur) => (cur && cur.internId === internId ? { ...cur, status: cur.status === 'Active' ? 'Inactive' : 'Active' } : cur));
+  const updateStatus = async (target: UserProfile) => {
+    const nextStatus: UserProfile['status'] = target.status === 'Active' ? 'Inactive' : 'Active';
+    setSavingId(target.internId);
+    try {
+      if (!target.id) throw new Error('Student record is missing its account identifier.');
+      await setStudentEnrollmentStatus(target.id, nextStatus === 'Active');
+      const refreshed = students.map((s) =>
+        s.internId === target.internId ? { ...s, status: nextStatus } : s
+      );
+      setStudents(refreshed);
+      if (selected && selected.internId === target.internId) {
+        setSelected({ ...selected, status: nextStatus });
+      }
+    } catch (err: any) {
+      console.error('Failed to update student status:', err);
+      alert(err?.message || 'Failed to update student status.');
+    } finally {
+      setSavingId(null);
+    }
   };
 
   return (
@@ -64,6 +93,12 @@ export default function AdminStudentsPage() {
           </div>
         }
       />
+
+      {error && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700">
+          {error}
+        </div>
+      )}
 
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
         <div className="overflow-x-auto">
@@ -98,7 +133,7 @@ export default function AdminStudentsPage() {
                   <td className="py-3.5 pr-4 text-xs text-slate-500 max-w-[180px] truncate">{s.college}</td>
                   <td className="py-3.5 pr-4 text-xs text-slate-500 whitespace-nowrap">{s.joinedOn}</td>
                   <td className="py-3.5 pr-4">
-                    <span className={`px-3 py-1 rounded-full text-[11px] font-bold border ${statusStyles[s.status]}`}>
+                    <span className={`px-3 py-1 rounded-full text-[11px] font-bold border ${statusStyles[s.status] || statusStyles.Active}`}>
                       {s.status}
                     </span>
                   </td>
@@ -116,7 +151,7 @@ export default function AdminStudentsPage() {
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={7} className="py-10 text-center text-xs font-medium text-slate-400">
-                    No students match your search.
+                    {loading ? 'Loading students…' : error ? 'Could not load students.' : 'No students match your search.'}
                   </td>
                 </tr>
               )}
@@ -185,7 +220,7 @@ export default function AdminStudentsPage() {
                   <p className="text-[11px] text-slate-400 font-semibold">Internships</p>
                   <p className="text-sm font-bold text-slate-900">{selected.completedInternships} / {selected.totalInternships} completed</p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-[11px] font-bold border ${statusStyles[selected.status]}`}>
+                <span className={`px-3 py-1 rounded-full text-[11px] font-bold border ${statusStyles[selected.status] || statusStyles.Active}`}>
                   {selected.status}
                 </span>
               </div>
@@ -198,11 +233,12 @@ export default function AdminStudentsPage() {
                   Close
                 </button>
                 <button
-                  onClick={() => toggleStatus(selected.internId)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors"
+                  onClick={() => updateStatus(selected)}
+                  disabled={savingId === selected.internId}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-colors disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  {selected.status === 'Active' ? 'Deactivate Intern' : 'Activate Intern'}
+                  {savingId === selected.internId ? 'Saving...' : selected.status === 'Active' ? 'Deactivate Intern' : 'Activate Intern'}
                 </button>
               </div>
             </div>

@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { Calendar, CheckCircle2, AlertTriangle, ArrowRight, Linkedin, Award, FileCheck, CreditCard } from 'lucide-react';
+import { Calendar, CheckCircle2, ArrowRight, Linkedin, Award, Clock3 } from 'lucide-react';
 import { Task } from '@/lib/types';
 import { StatusBadge } from '@/components/common/StatusBadge';
 
@@ -13,6 +12,7 @@ interface TaskCardProps {
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenDetails }) => {
   const isCompleted = task.status === 'Completed';
+  const isUnderReview = task.internshipStatus === 'VERIFICATION_PENDING' || task.internshipStatus === 'SUBMITTED';
 
   return (
     <div
@@ -39,10 +39,19 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenDetails }) => {
 
         {/* Due Date & Submission Metadata */}
         <div className="space-y-1 mb-3 text-xs">
-          <div className="flex items-center gap-1.5 font-semibold text-slate-600">
-            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            <span>Due Date: <span className="text-slate-900 font-bold">{task.dueDate}</span></span>
-          </div>
+          {!isUnderReview && (
+            <div className="flex items-center gap-1.5 font-semibold text-slate-600">
+              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              <span>Due Date: <span className="text-slate-900 font-bold">{task.dueDate}</span></span>
+            </div>
+          )}
+
+          {isUnderReview && (
+            <div className="flex items-start gap-1.5 pt-1 text-[11px] font-semibold leading-relaxed text-blue-700">
+              <Clock3 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>Usually verifies in about 2 minutes; allow up to 10 minutes.</span>
+            </div>
+          )}
 
           {task.submittedOnTrack && (
             <div className="flex items-center gap-1.5 font-medium text-emerald-600">
@@ -88,29 +97,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenDetails }) => {
           </div>
         )}
 
-        {/* Payment Required State (Certificate Task) */}
-        {task.paymentRequired && (
-          <div className="space-y-3 p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900">
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-800">
-              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>{task.paymentWarning}</span>
-            </div>
-            <p className="text-[11px] text-amber-700 leading-normal">
-              {task.paymentDescription}
-            </p>
-            <Link
-              href="/dashboard/payments"
-              onClick={(e) => e.stopPropagation()}
-              className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs"
-            >
-              <CreditCard className="w-4 h-4" />
-              <span>{task.bottomCtaText || "Go to Payment Tab"}</span>
-            </Link>
+        {/* Normal Pending / Available Action State */}
+        {isUnderReview && (
+          <div className="w-full rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-xs font-bold text-blue-800 flex items-center justify-center gap-2">
+            <Clock3 className="h-4 w-4" />
+            <span>Waiting for verification</span>
           </div>
         )}
-
-        {/* Normal Pending / Available Action State */}
-        {!isCompleted && !task.paymentRequired && (
+        {!isCompleted && !isUnderReview && (
           <button className="w-full py-2.5 px-3 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs">
             <span>Submit Task</span>
             <ArrowRight className="w-4 h-4" />
