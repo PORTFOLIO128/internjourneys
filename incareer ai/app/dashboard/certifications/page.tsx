@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/authContext';
 import { supabase } from '@/lib/supabase/client';
 import { issueCertificateForCurrentStudent } from '@/lib/supabase/queries';
 import { certificateFileName, generateCertificate } from '@/utils/certificateGenerator';
+import { certificateVerificationUrl } from '@/utils/certificateVerificationUrl';
 import type { StudentCertificateAccess } from '@/lib/types';
 import certificateTemplate from '@/assets/finalcert.png';
 
@@ -54,7 +55,7 @@ export default function CertificationsPage() {
         issueDate: data.issue_date || 'Pending',
         status: data.status === 'ISSUED' ? 'Verified' : 'Pending Payment',
         endDate: data.end_date || undefined,
-        verificationUrl: data.verification_url || `${window.location.origin}/verify/${data.certificate_id}`,
+        verificationUrl: certificateVerificationUrl(data.certificate_id, window.location.origin),
         pdfUrl: data.file_path || undefined
       });
       setPreviewUrl('');
