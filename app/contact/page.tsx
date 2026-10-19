@@ -14,14 +14,14 @@ export default function ContactPage() {
     >
       <InfoSection title="Business information">
         <dl className="grid gap-3 sm:grid-cols-[190px_1fr]">
-          <dt className="font-semibold text-slate-900">Registered enterprise</dt>
-          <dd>INTERNJOURNEYS</dd>
-          <dt className="font-semibold text-slate-900">Public brand</dt>
+          <dt className="font-semibold text-slate-900">Business name</dt>
           <dd>InternJourneys</dd>
+          <dt className="font-semibold text-slate-900">Proprietor</dt>
+          <dd>VADIVEL BHUVANESH</dd>
           <dt className="font-semibold text-slate-900">Business location</dt>
           <dd>Pudukkottai district, Tamil Nadu, India</dd>
           <dt className="font-semibold text-slate-900">Support email</dt>
-          <dd><a className="font-semibold text-indigo-600 hover:underline" href="mailto:internjourney26@gmail.com">internjourney26@gmail.com</a></dd>
+          <dd><a className="font-semibold text-indigo-600 hover:underline" href="mailto:bhuvaneshbhuvan128@gmail.com">bhuvaneshbhuvan128@gmail.com</a></dd>
         </dl>
       </InfoSection>
 

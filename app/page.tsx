@@ -318,9 +318,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex flex-col items-center gap-1 sm:items-start">
             <Logo subtitle={false} />
-            <span className="text-[10px] text-slate-400">INTERNJOURNEYS · Pudukkottai district, Tamil Nadu, India</span>
-            <a href="mailto:internjourney26@gmail.com" className="text-[10px] font-semibold text-indigo-600 hover:underline">
-              internjourney26@gmail.com
+            <span className="text-[10px] text-slate-400">InternJourneys · Proprietor: VADIVEL BHUVANESH · Pudukkottai district, Tamil Nadu, India</span>
+            <a href="mailto:bhuvaneshbhuvan128@gmail.com" className="text-[10px] font-semibold text-indigo-600 hover:underline">
+              bhuvaneshbhuvan128@gmail.com
             </a>
           </div>
           <nav aria-label="Footer navigation" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 font-semibold">

@@ -30,7 +30,7 @@ export default function AboutPage() {
     >
       <InfoSection title="Our purpose">
         <p>InternJourneys provides structured virtual internship tracks designed around guided learning tasks and practical project work. Students can choose a domain, enroll online, work through the task roadmap and submit their work through the platform.</p>
-        <p>INTERNJOURNEYS is the registered enterprise name supplied for the business. The business identifies as an Udyam-registered Micro enterprise in Pudukkottai district, Tamil Nadu, India. This is business identification, not a claim of university accreditation or guaranteed recognition.</p>
+        <p>InternJourneys is the business name, operated by proprietor VADIVEL BHUVANESH in Pudukkottai district, Tamil Nadu, India. The business identifies as an Udyam-registered Micro enterprise. This is business identification, not a claim of university accreditation or guaranteed recognition.</p>
       </InfoSection>
 
       <InfoSection title="Learning journey">
@@ -55,7 +55,7 @@ export default function AboutPage() {
       </InfoSection>
 
       <InfoSection title="Contact">
-        <p>For questions about the platform, contact <a className="font-semibold text-indigo-600 hover:underline" href="mailto:internjourney26@gmail.com">internjourney26@gmail.com</a>. Business location: Pudukkottai district, Tamil Nadu, India.</p>
+        <p>For questions about the platform, contact <a className="font-semibold text-indigo-600 hover:underline" href="mailto:bhuvaneshbhuvan128@gmail.com">bhuvaneshbhuvan128@gmail.com</a>. InternJourneys is operated by proprietor VADIVEL BHUVANESH in Pudukkottai district, Tamil Nadu, India.</p>
       </InfoSection>
     </PublicInfoLayout>
   );
