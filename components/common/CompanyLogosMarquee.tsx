@@ -19,7 +19,7 @@ export const CompanyLogosMarquee: React.FC = () => {
   const items = [...learningAreas, ...learningAreas, ...learningAreas];
 
   return (
-    <div className="w-full space-y-5 select-none pointer-events-none">
+    <div className="w-full min-w-0 space-y-5 select-none pointer-events-none">
       <div className="text-center">
         <p className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-[#1D61FF]">
           Explore project-based learning areas
@@ -27,7 +27,7 @@ export const CompanyLogosMarquee: React.FC = () => {
       </div>
 
       {/* Moving Marquee */}
-      <div className="relative overflow-hidden py-4 border-y border-slate-200/60 bg-white/40">
+      <div className="relative w-full min-w-0 overflow-hidden py-4 border-y border-slate-200/60 bg-white/40">
         <div className="absolute top-0 bottom-0 left-0 w-20 bg-gradient-to-r from-[#F8FAFC] to-transparent z-10"></div>
         <div className="absolute top-0 bottom-0 right-0 w-20 bg-gradient-to-l from-[#F8FAFC] to-transparent z-10"></div>
 

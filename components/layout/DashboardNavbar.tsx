@@ -89,6 +89,9 @@ export const DashboardNavbar: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  aria-label={`Open ${currentUser.name} account menu`}
+                  aria-expanded={userDropdownOpen}
+                  aria-controls="student-account-menu"
                   className="flex items-center gap-2.5 p-1.5 pr-2.5 rounded-full border border-slate-200 hover:border-indigo-200 hover:bg-slate-50 transition-all duration-200"
                 >
                   <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
@@ -97,8 +100,7 @@ export const DashboardNavbar: React.FC = () => {
                   <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
                 </button>
 
-                {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div id="student-account-menu" hidden={!userDropdownOpen} className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="px-4 py-2 border-b border-slate-100">
                     <p className="text-sm font-bold text-slate-900">{currentUser.name}</p>
                     <p className="text-xs text-slate-500 font-medium truncate">{currentUser.domain}</p>
@@ -133,8 +135,7 @@ export const DashboardNavbar: React.FC = () => {
                       Sign Out
                     </button>
                   </div>
-                  </div>
-                )}
+                </div>
               </div>
             )}
           </div>
@@ -145,6 +146,8 @@ export const DashboardNavbar: React.FC = () => {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-xl text-slate-600 hover:bg-slate-100 focus:outline-none"
               aria-label="Toggle Navigation"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="student-mobile-navigation"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -152,8 +155,7 @@ export const DashboardNavbar: React.FC = () => {
         </div>
 
         {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-200/80 py-4 space-y-2 animate-in slide-in-from-top duration-200">
+        <div id="student-mobile-navigation" hidden={!mobileMenuOpen} className="lg:hidden border-t border-slate-200/80 py-4 space-y-2 animate-in slide-in-from-top duration-200">
             <div className="grid grid-cols-2 gap-2 mb-4">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -162,6 +164,7 @@ export const DashboardNavbar: React.FC = () => {
                   <Link
                     key={item.href}
                     href={item.href}
+                    aria-current={isActive ? 'page' : undefined}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
                       isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 bg-slate-50'
@@ -195,7 +198,6 @@ export const DashboardNavbar: React.FC = () => {
               </div>
             )}
           </div>
-        )}
       </div>
     </header>
   );

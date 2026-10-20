@@ -2,8 +2,20 @@ import type { Metadata } from 'next';
 import { InfoSection, PublicInfoLayout } from '@/components/common/PublicInfoLayout';
 
 export const metadata: Metadata = {
-  title: 'Contact Us | InternJourneys',
+  title: 'Contact Us',
   description: 'Contact INTERNJOURNEYS for questions about virtual internships, accounts, payments or certificates.',
+  alternates: {
+    canonical: '/contact',
+  },
+  openGraph: {
+    title: 'Contact InternJourneys',
+    description: 'Contact InternJourneys for questions about virtual internships, accounts, payments or certificates.',
+    url: '/contact',
+  },
+  twitter: {
+    title: 'Contact InternJourneys',
+    description: 'Contact InternJourneys for platform, payment, or certificate support.',
+  },
 };
 
 export default function ContactPage() {

@@ -95,7 +95,7 @@ function RegisterForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-slate-900 font-sans flex flex-col justify-center antialiased p-4 sm:p-6 lg:p-8">
+    <main id="main-content" className="min-h-screen bg-background text-slate-900 font-sans flex flex-col justify-center antialiased p-4 sm:p-6 lg:p-8">
       <div className="max-w-3xl w-full mx-auto bg-white rounded-3xl border border-slate-200 shadow-2xl p-8 sm:p-10 space-y-6">
 
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -122,8 +122,9 @@ function RegisterForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+              <label htmlFor="register-name" className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
               <input
+                id="register-name"
                 type="text"
                 required
                 placeholder="Hari Narayan S"
@@ -134,8 +135,9 @@ function RegisterForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+              <label htmlFor="register-email" className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
               <input
+                id="register-email"
                 type="email"
                 required
                 pattern="[^@]*@gmail\.com"
@@ -148,8 +150,9 @@ function RegisterForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+              <label htmlFor="register-password" className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
               <input
+                id="register-password"
                 type="password"
                 required
                 placeholder="••••••••"
@@ -160,8 +163,9 @@ function RegisterForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Confirm Password</label>
+              <label htmlFor="register-confirm-password" className="block text-xs font-semibold text-slate-700 mb-1">Confirm Password</label>
               <input
+                id="register-confirm-password"
                 type="password"
                 required
                 placeholder="••••••••"
@@ -172,8 +176,9 @@ function RegisterForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Mobile Number</label>
+              <label htmlFor="register-phone" className="block text-xs font-semibold text-slate-700 mb-1">Mobile Number</label>
               <input
+                id="register-phone"
                 type="tel"
                 required
                 pattern="[0-9]{10}"
@@ -187,8 +192,9 @@ function RegisterForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">College / University</label>
+              <label htmlFor="register-college" className="block text-xs font-semibold text-slate-700 mb-1">College / University</label>
               <input
+                id="register-college"
                 type="text"
                 required
                 placeholder="IIT / Anna University"
@@ -199,8 +205,9 @@ function RegisterForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Graduation Year</label>
+              <label htmlFor="register-graduation-year" className="block text-xs font-semibold text-slate-700 mb-1">Graduation Year</label>
               <select
+                id="register-graduation-year"
                 value={formData.graduationYear}
                 onChange={(e) => setFormData({ ...formData, graduationYear: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 text-xs text-slate-900 outline-none"
@@ -213,8 +220,9 @@ function RegisterForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Internship Domain</label>
+              <label htmlFor="register-domain" className="block text-xs font-semibold text-slate-700 mb-1">Internship Domain</label>
               <select
+                id="register-domain"
                 value={formData.domain}
                 onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 text-xs text-slate-900 outline-none"
@@ -259,13 +267,13 @@ function RegisterForm() {
         </p>
 
       </div>
-    </div>
+    </main>
   );
 }
 
 function RegisterFallback() {
   return (
-    <div className="min-h-screen bg-background text-slate-900 font-sans flex flex-col justify-center antialiased p-4 sm:p-6 lg:p-8">
+    <main id="main-content" className="min-h-screen bg-background text-slate-900 font-sans flex flex-col justify-center antialiased p-4 sm:p-6 lg:p-8">
       <div className="max-w-3xl w-full mx-auto bg-white rounded-3xl border border-slate-200 shadow-2xl p-8 sm:p-10 space-y-6">
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <Logo href="/" />
@@ -273,6 +281,6 @@ function RegisterFallback() {
         </div>
         <div className="text-xs text-slate-500 font-medium">Loading registration...</div>
       </div>
-    </div>
+    </main>
   );
 }

@@ -50,7 +50,7 @@ export default function PublicVerifyPage() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-12 space-y-8">
+      <main id="main-content" className="flex-1 max-w-3xl w-full mx-auto px-4 py-12 space-y-8">
         
         {loading ? (
           <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-4 shadow-card">

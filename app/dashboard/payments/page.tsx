@@ -136,7 +136,7 @@ export default function PaymentsPage() {
     <div className="min-h-screen bg-background text-slate-900 font-sans flex flex-col antialiased">
       <DashboardNavbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div className="max-w-3xl space-y-6">
           <Link href="/dashboard/certifications" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-indigo-600">
             <ArrowLeft className="h-4 w-4" />

@@ -127,7 +127,7 @@ export default function AdminCertificateAccessPage() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
-        <div className="overflow-x-auto">
+        <div role="region" aria-label="Certificate access table; scroll horizontally to view all columns" tabIndex={0} className="overflow-x-auto">
           <table className="w-full min-w-[1100px] text-left">
             <thead className="bg-slate-50">
               <tr className="border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">

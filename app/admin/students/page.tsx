@@ -102,7 +102,7 @@ export default function AdminStudentsPage() {
       )}
 
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-card overflow-hidden">
-        <div className="overflow-x-auto">
+        <div role="region" aria-label="Student records table; scroll horizontally to view all columns" tabIndex={0} className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-200 text-[11px] uppercase tracking-wider font-bold text-slate-400">

@@ -40,7 +40,7 @@ export default function HelpPage() {
     <div className="min-h-screen bg-background text-slate-900 font-sans flex flex-col antialiased">
       <DashboardNavbar />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main id="main-content" className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         {/* Header */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-card text-center space-y-4">
@@ -83,6 +83,8 @@ export default function HelpPage() {
                 >
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    aria-expanded={isOpen}
+                    aria-controls={`help-faq-${idx}`}
                     className="w-full p-4 text-left flex items-center justify-between font-bold text-xs sm:text-sm text-slate-900 hover:bg-slate-50 transition-colors"
                   >
                     <span>{faq.q}</span>
@@ -92,11 +94,13 @@ export default function HelpPage() {
                       <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
                     )}
                   </button>
-                  {isOpen && (
-                    <div className="px-4 pb-4 pt-1 text-xs text-slate-600 leading-relaxed border-t border-slate-100 bg-slate-50/50">
-                      {faq.a}
-                    </div>
-                  )}
+                  <div
+                    id={`help-faq-${idx}`}
+                    hidden={!isOpen}
+                    className="px-4 pb-4 pt-1 text-xs text-slate-600 leading-relaxed border-t border-slate-100 bg-slate-50/50"
+                  >
+                    {faq.a}
+                  </div>
                 </div>
               );
             })}

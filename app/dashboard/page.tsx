@@ -69,7 +69,7 @@ export default function DashboardPage() {
       <DashboardNavbar />
 
       {/* Main Student Workspace Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
         
         {/* 1. Student Welcome Hero Card (Offer Letter & Intern ID) */}
         {user && <WelcomeHero user={user} />}

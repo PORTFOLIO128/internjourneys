@@ -3,8 +3,20 @@ import Link from 'next/link';
 import { InfoSection, PublicInfoLayout } from '@/components/common/PublicInfoLayout';
 
 export const metadata: Metadata = {
-  title: 'About InternJourneys | Virtual Internships',
-  description: 'Learn about InternJourneys, an online virtual internship and project-based learning platform.',
+  title: 'About Us',
+  description: 'Learn about InternJourneys, its virtual internship tracks, project-based learning approach, and business operator.',
+  alternates: {
+    canonical: '/about',
+  },
+  openGraph: {
+    title: 'About InternJourneys',
+    description: 'Learn about InternJourneys, its virtual internship tracks, project-based learning approach, and business operator.',
+    url: '/about',
+  },
+  twitter: {
+    title: 'About InternJourneys',
+    description: 'Learn about InternJourneys and its virtual internship tracks.',
+  },
 };
 
 const domains = [

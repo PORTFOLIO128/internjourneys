@@ -2,8 +2,20 @@ import type { Metadata } from 'next';
 import { InfoSection, PublicInfoLayout } from '@/components/common/PublicInfoLayout';
 
 export const metadata: Metadata = {
-  title: 'Refund & Cancellation Policy | InternJourneys',
+  title: 'Refund & Cancellation Policy',
   description: 'Review the certificate fee, payment issue, duplicate charge and cancellation process for InternJourneys.',
+  alternates: {
+    canonical: '/refund-policy',
+  },
+  openGraph: {
+    title: 'Refund & Cancellation Policy',
+    description: 'Review the certificate fee, payment issue, duplicate charge and cancellation process for InternJourneys.',
+    url: '/refund-policy',
+  },
+  twitter: {
+    title: 'Refund & Cancellation Policy',
+    description: 'Review the certificate fee, payment issue, duplicate charge and cancellation process for InternJourneys.',
+  },
 };
 
 export default function RefundPolicyPage() {

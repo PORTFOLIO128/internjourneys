@@ -2,8 +2,20 @@ import type { Metadata } from 'next';
 import { InfoSection, PublicInfoLayout } from '@/components/common/PublicInfoLayout';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | InternJourneys',
+  title: 'Privacy Policy',
   description: 'Learn what personal information InternJourneys processes to provide online internships and certificate services.',
+  alternates: {
+    canonical: '/privacy-policy',
+  },
+  openGraph: {
+    title: 'Privacy Policy',
+    description: 'Learn what personal information InternJourneys processes to provide online internships and certificate services.',
+    url: '/privacy-policy',
+  },
+  twitter: {
+    title: 'Privacy Policy',
+    description: 'Learn what personal information InternJourneys processes to provide online internships and certificate services.',
+  },
 };
 
 export default function PrivacyPolicyPage() {

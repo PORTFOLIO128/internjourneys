@@ -18,7 +18,6 @@ export const Logo: React.FC<LogoProps> = ({ className = '', href = '/', subtitle
           width={72}
           height={72}
           className="h-full w-full object-cover"
-          priority
         />
       </div>
 

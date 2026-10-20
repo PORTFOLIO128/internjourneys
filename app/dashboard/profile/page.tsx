@@ -28,7 +28,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-background text-slate-900 font-sans flex flex-col antialiased">
       <DashboardNavbar />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main id="main-content" className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         {/* Header */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-card flex items-center justify-between">
@@ -63,8 +63,9 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+              <label htmlFor="profile-name" className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
               <input
+                id="profile-name"
                 type="text"
                 value={profile.name}
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
@@ -73,8 +74,9 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Intern ID (Read-only)</label>
+              <label htmlFor="profile-intern-id" className="block text-xs font-semibold text-slate-700 mb-1">Intern ID (Read-only)</label>
               <input
+                id="profile-intern-id"
                 type="text"
                 disabled
                 value={profile.internId}
@@ -83,8 +85,9 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+              <label htmlFor="profile-email" className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
               <input
+                id="profile-email"
                 type="email"
                 value={profile.email}
                 onChange={(e) => setProfile({ ...profile, email: e.target.value })}
@@ -93,8 +96,9 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+              <label htmlFor="profile-phone" className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
               <input
+                id="profile-phone"
                 type="tel"
                 value={profile.phone}
                 onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
@@ -109,8 +113,9 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">College / University</label>
+              <label htmlFor="profile-college" className="block text-xs font-semibold text-slate-700 mb-1">College / University</label>
               <input
+                id="profile-college"
                 type="text"
                 value={profile.college}
                 onChange={(e) => setProfile({ ...profile, college: e.target.value })}
@@ -119,8 +124,9 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Graduation Year</label>
+              <label htmlFor="profile-graduation-year" className="block text-xs font-semibold text-slate-700 mb-1">Graduation Year</label>
               <input
+                id="profile-graduation-year"
                 type="text"
                 value={profile.graduationYear}
                 onChange={(e) => setProfile({ ...profile, graduationYear: e.target.value })}
@@ -129,8 +135,9 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Internship Domain</label>
+              <label htmlFor="profile-domain" className="block text-xs font-semibold text-slate-700 mb-1">Internship Domain</label>
               <input
+                id="profile-domain"
                 type="text"
                 disabled
                 value={profile.domain}

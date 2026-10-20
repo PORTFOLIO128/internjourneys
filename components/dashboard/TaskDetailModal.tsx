@@ -188,12 +188,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             
             {/* Input URL */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label htmlFor="task-submission-url" className="block text-xs font-semibold text-slate-700 mb-1">
                 Project / Repository URL
               </label>
               <div className="relative">
                 <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 <input
+                  id="task-submission-url"
                   type="url"
                   required
                   placeholder="https://github.com/your-username/project-repo"
