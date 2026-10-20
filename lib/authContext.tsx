@@ -146,31 +146,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data, error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
-      options: { data: { full_name: formData.name, initials } },
+      options: {
+        data: {
+          full_name: formData.name,
+          initials,
+          role: 'student',
+          phone: formData.phone || null,
+          college: formData.college || null,
+          graduation_year: formData.graduation_year || null,
+        },
+      },
     });
+
+    let session = data.session;
+    let recoveredExistingAccount = false;
     if (error) {
-      if (error.message.toLowerCase().includes('email rate limit')) {
+      const isAlreadyRegistered = error.message.toLowerCase().includes('already registered');
+      const isEmailRateLimit = error.message.toLowerCase().includes('email rate limit');
+
+      if (isAlreadyRegistered || isEmailRateLimit) {
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email: formData.email,
           password: formData.password,
         });
 
-        if (!signInError && signInData.session) {
-          await fetchCurrentUser();
-          return;
+        if (signInError) {
+          if (isAlreadyRegistered) throw signInError;
+          throw new Error(
+            'Signup is blocked by Supabase email limits. Turn off Confirm email in Supabase Authentication settings, then try again.'
+          );
         }
 
-        throw new Error(
-          'Signup is blocked by Supabase email limits. Turn off Confirm email in Supabase Authentication settings, then try again.'
-        );
+        if (!signInData.session) throw new Error('Could not start a session for this account.');
+        session = signInData.session;
+        recoveredExistingAccount = isAlreadyRegistered;
+      } else {
+        throw error;
       }
-
-      throw error;
     }
-    if (!data.user) throw new Error('Registration did not return a Supabase user.');
 
-    let session = data.session;
     if (!session) {
+      if (!data.user) throw new Error('Registration did not return a Supabase user.');
+
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -180,22 +197,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       session = signInData.session;
     }
-
-    const { error: profileError } = await supabase.from('profiles').upsert({
-      id: data.user.id,
-      full_name: formData.name,
-      initials,
-      role: 'student',
-      phone: formData.phone || null,
-      college: formData.college || null,
-      graduation_year: formData.graduation_year || null,
-    });
-    if (profileError) throw profileError;
+    if (!session) throw new Error('Registration did not return an authenticated session.');
 
     const domains = await getActiveDomains();
     const selectedDomain = domains.find((domain) => domain.name === formData.domain || domain.slug === formData.domain);
     if (selectedDomain) {
-      await createInternshipEnrollment(selectedDomain.id);
+      try {
+        await createInternshipEnrollment(selectedDomain.id);
+      } catch (enrollmentError) {
+        const message = enrollmentError instanceof Error
+          ? enrollmentError.message
+          : enrollmentError && typeof enrollmentError === 'object' && 'message' in enrollmentError
+            ? String(enrollmentError.message)
+            : '';
+        if (!recoveredExistingAccount || !message.includes('already have an active internship')) {
+          throw enrollmentError;
+        }
+      }
     }
 
     setToken(session?.access_token || null);
