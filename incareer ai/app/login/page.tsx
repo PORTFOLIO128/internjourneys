@@ -31,7 +31,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-slate-900 font-sans flex flex-col justify-center antialiased p-4 sm:p-6 lg:p-8">
+    <main id="main-content" className="min-h-screen bg-background text-slate-900 font-sans flex flex-col justify-center antialiased p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl w-full mx-auto bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         
         {/* Left Side: Brand Visual Panel */}
@@ -76,10 +76,11 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+              <label htmlFor="login-email" className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 <input
+                  id="login-email"
                   type="email"
                   required
                   placeholder="you@gmail.com"
@@ -92,12 +93,13 @@ export default function LoginPage() {
 
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="block text-xs font-semibold text-slate-700">Password</label>
+                <label htmlFor="login-password" className="block text-xs font-semibold text-slate-700">Password</label>
                 <a href="#" className="text-xs font-bold text-indigo-600 hover:underline">Forgot password?</a>
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 <input
+                  id="login-password"
                   type="password"
                   required
                   placeholder="Enter your password"
@@ -133,6 +135,6 @@ export default function LoginPage() {
         </div>
 
       </div>
-    </div>
+    </main>
   );
 }

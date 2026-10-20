@@ -52,7 +52,7 @@ export default function InternshipsPage() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         <div className="bg-gradient-to-br from-[#0F0E38] via-[#17164B] to-[#1E1B4B] text-white p-8 sm:p-12 rounded-3xl shadow-xl space-y-4">
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-200 bg-white/10 px-3 py-1 rounded-full border border-white/10">
             <Sparkles className="w-3.5 h-3.5" />
@@ -67,9 +67,12 @@ export default function InternshipsPage() {
 
           <div className="relative max-w-xl pt-2">
             <Search className="w-4 h-4 text-slate-400 absolute left-4 top-5" />
+            <label htmlFor="internship-search" className="sr-only">Search by role, skill, or domain</label>
             <input
+              id="internship-search"
               type="text"
               placeholder="Search by role, skill, or domain..."
+              aria-label="Search by role, skill, or domain"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white text-slate-900 placeholder:text-slate-400 text-xs font-semibold outline-none shadow-md"

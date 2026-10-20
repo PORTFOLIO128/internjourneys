@@ -239,7 +239,7 @@ export default function AdminDomainsTasksPage() {
                       {domain.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  <button onClick={() => setEditingDomain({ ...domain, skills: domain.domain_skills?.map((s) => s.skill_name) || [] })} className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:text-indigo-600">
+                  <button aria-label={`Edit domain ${domain.name}`} onClick={() => setEditingDomain({ ...domain, skills: domain.domain_skills?.map((s) => s.skill_name) || [] })} className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:text-indigo-600">
                     <Pencil className="w-4 h-4" />
                   </button>
                 </div>
@@ -287,7 +287,7 @@ export default function AdminDomainsTasksPage() {
                 <Plus className="w-4 h-4" /> Add Task
               </button>
             </div>
-            <div className="overflow-x-auto">
+            <div role="region" aria-label="Task roadmap table; scroll horizontally to view all columns" tabIndex={0} className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-slate-200 text-[11px] uppercase tracking-wider font-bold text-slate-400">
@@ -303,10 +303,10 @@ export default function AdminDomainsTasksPage() {
                       <td className="py-3.5 pr-4"><span className={`px-3 py-1 rounded-full text-[11px] font-bold border ${task.is_active ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>{task.is_active ? 'Active' : 'Inactive'}</span></td>
                       <td className="py-3.5 text-right">
                         <div className="flex justify-end gap-2">
-                          <button onClick={() => setEditingTask(task)} disabled={saving} className="p-2 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-50"><Pencil className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => duplicateTask(task)} disabled={saving} className="p-2 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-50"><Copy className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => toggleTask(task)} disabled={saving} className="p-2 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-50"><Power className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => deleteTask(task)} disabled={saving} className="p-2 rounded-xl border border-rose-200 text-rose-600 disabled:opacity-50"><Trash2 className="w-3.5 h-3.5" /></button>
+                          <button aria-label={`Edit ${task.title}`} onClick={() => setEditingTask(task)} disabled={saving} className="p-2 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-50"><Pencil className="w-3.5 h-3.5" /></button>
+                          <button aria-label={`Duplicate ${task.title}`} onClick={() => duplicateTask(task)} disabled={saving} className="p-2 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-50"><Copy className="w-3.5 h-3.5" /></button>
+                          <button aria-label={`${task.is_active ? 'Deactivate' : 'Activate'} ${task.title}`} onClick={() => toggleTask(task)} disabled={saving} className="p-2 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-50"><Power className="w-3.5 h-3.5" /></button>
+                          <button aria-label={`Delete ${task.title}`} onClick={() => deleteTask(task)} disabled={saving} className="p-2 rounded-xl border border-rose-200 text-rose-600 disabled:opacity-50"><Trash2 className="w-3.5 h-3.5" /></button>
                         </div>
                       </td>
                     </tr>
@@ -321,17 +321,17 @@ export default function AdminDomainsTasksPage() {
 
       {editingDomain && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setEditingDomain(null)}>
-          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between"><h3 className="text-lg font-bold text-slate-900">Domain Editor</h3><button onClick={() => setEditingDomain(null)}><X className="w-5 h-5 text-slate-400" /></button></div>
+          <div role="dialog" aria-modal="true" aria-labelledby="domain-editor-title" className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between"><h3 id="domain-editor-title" className="text-lg font-bold text-slate-900">Domain Editor</h3><button aria-label="Close domain editor" onClick={() => setEditingDomain(null)}><X className="w-5 h-5 text-slate-400" /></button></div>
             <div className="p-6 space-y-4">
-              <input value={editingDomain.name || ''} onChange={(e) => setEditingDomain({ ...editingDomain, name: e.target.value })} placeholder="Domain name" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
-              <textarea rows={2} value={editingDomain.short_description || ''} onChange={(e) => setEditingDomain({ ...editingDomain, short_description: e.target.value })} placeholder="Short description" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none resize-none" />
-              <textarea rows={4} value={editingDomain.description || ''} onChange={(e) => setEditingDomain({ ...editingDomain, description: e.target.value })} placeholder="Full description" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none resize-none" />
+              <input aria-label="Domain name" value={editingDomain.name || ''} onChange={(e) => setEditingDomain({ ...editingDomain, name: e.target.value })} placeholder="Domain name" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
+              <textarea aria-label="Short description" rows={2} value={editingDomain.short_description || ''} onChange={(e) => setEditingDomain({ ...editingDomain, short_description: e.target.value })} placeholder="Short description" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none resize-none" />
+              <textarea aria-label="Full description" rows={4} value={editingDomain.description || ''} onChange={(e) => setEditingDomain({ ...editingDomain, description: e.target.value })} placeholder="Full description" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none resize-none" />
               <div className="grid grid-cols-2 gap-3">
-                <input value={editingDomain.level || 'Beginner'} onChange={(e) => setEditingDomain({ ...editingDomain, level: e.target.value as DomainRow['level'] })} placeholder="Level" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
-                <input type="number" value={editingDomain.duration_weeks || 4} onChange={(e) => setEditingDomain({ ...editingDomain, duration_weeks: Number(e.target.value) })} placeholder="Duration weeks" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
+                <input aria-label="Difficulty level" value={editingDomain.level || 'Beginner'} onChange={(e) => setEditingDomain({ ...editingDomain, level: e.target.value as DomainRow['level'] })} placeholder="Level" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
+                <input aria-label="Duration in weeks" type="number" value={editingDomain.duration_weeks || 4} onChange={(e) => setEditingDomain({ ...editingDomain, duration_weeks: Number(e.target.value) })} placeholder="Duration weeks" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
               </div>
-              <input value={(editingDomain.skills || []).join(', ')} onChange={(e) => setEditingDomain({ ...editingDomain, skills: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} placeholder="Skills, comma separated" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
+              <input aria-label="Skills, comma separated" value={(editingDomain.skills || []).join(', ')} onChange={(e) => setEditingDomain({ ...editingDomain, skills: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} placeholder="Skills, comma separated" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
               <button onClick={saveDomain} disabled={saving} className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs disabled:opacity-50"><Check className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Domain'}</button>
             </div>
           </div>
@@ -340,19 +340,19 @@ export default function AdminDomainsTasksPage() {
 
       {editingTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setEditingTask(null)}>
-          <div className="w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between"><h3 className="text-lg font-bold text-slate-900">Task Editor</h3><button onClick={() => setEditingTask(null)}><X className="w-5 h-5 text-slate-400" /></button></div>
+          <div role="dialog" aria-modal="true" aria-labelledby="task-editor-title" className="w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between"><h3 id="task-editor-title" className="text-lg font-bold text-slate-900">Task Editor</h3><button aria-label="Close task editor" onClick={() => setEditingTask(null)}><X className="w-5 h-5 text-slate-400" /></button></div>
             <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
-                <input type="number" value={editingTask.task_number || 1} onChange={(e) => setEditingTask({ ...editingTask, task_number: Number(e.target.value) })} placeholder="Task number" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
-                <input value={editingTask.difficulty || 'Beginner'} onChange={(e) => setEditingTask({ ...editingTask, difficulty: e.target.value })} placeholder="Difficulty" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
+                <input aria-label="Task number" type="number" value={editingTask.task_number || 1} onChange={(e) => setEditingTask({ ...editingTask, task_number: Number(e.target.value) })} placeholder="Task number" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
+                <input aria-label="Difficulty" value={editingTask.difficulty || 'Beginner'} onChange={(e) => setEditingTask({ ...editingTask, difficulty: e.target.value })} placeholder="Difficulty" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
               </div>
-              <input value={editingTask.title || ''} onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })} placeholder="Task title" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
-              <textarea rows={2} value={editingTask.short_description || ''} onChange={(e) => setEditingTask({ ...editingTask, short_description: e.target.value })} placeholder="Short description" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none resize-none" />
-              <textarea rows={4} value={editingTask.description || ''} onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })} placeholder="Description" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none resize-none" />
-              <textarea rows={2} value={editingTask.learning_objective || ''} onChange={(e) => setEditingTask({ ...editingTask, learning_objective: e.target.value })} placeholder="Learning objective" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none resize-none" />
-              <input value={(editingTask.tools || []).join(', ')} onChange={(e) => setEditingTask({ ...editingTask, tools: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} placeholder="Tools, comma separated" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
-              <input value={(editingTask.deliverables || []).join(', ')} onChange={(e) => setEditingTask({ ...editingTask, deliverables: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} placeholder="Deliverables, comma separated" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
+              <input aria-label="Task title" value={editingTask.title || ''} onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })} placeholder="Task title" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
+              <textarea aria-label="Short description" rows={2} value={editingTask.short_description || ''} onChange={(e) => setEditingTask({ ...editingTask, short_description: e.target.value })} placeholder="Short description" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none resize-none" />
+              <textarea aria-label="Description" rows={4} value={editingTask.description || ''} onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })} placeholder="Description" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none resize-none" />
+              <textarea aria-label="Learning objective" rows={2} value={editingTask.learning_objective || ''} onChange={(e) => setEditingTask({ ...editingTask, learning_objective: e.target.value })} placeholder="Learning objective" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none resize-none" />
+              <input aria-label="Tools, comma separated" value={(editingTask.tools || []).join(', ')} onChange={(e) => setEditingTask({ ...editingTask, tools: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} placeholder="Tools, comma separated" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
+              <input aria-label="Deliverables, comma separated" value={(editingTask.deliverables || []).join(', ')} onChange={(e) => setEditingTask({ ...editingTask, deliverables: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} placeholder="Deliverables, comma separated" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none" />
               <button onClick={saveTask} disabled={saving} className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs disabled:opacity-50"><Check className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Task'}</button>
             </div>
           </div>

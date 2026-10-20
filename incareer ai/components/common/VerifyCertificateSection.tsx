@@ -67,7 +67,9 @@ export const VerifyCertificateSection: React.FC = () => {
         {/* Verification Card Input Container */}
         <div className="bg-[#F8FAFC] p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm max-w-2xl mx-auto space-y-6">
           <form onSubmit={handleVerify} className="flex flex-col sm:flex-row items-center gap-3">
+            <label htmlFor="certificate-number" className="sr-only">Certificate number</label>
             <input
+              id="certificate-number"
               type="text"
               required
               placeholder="Enter Certificate Number (e.g., CDM/CERT/123456)"

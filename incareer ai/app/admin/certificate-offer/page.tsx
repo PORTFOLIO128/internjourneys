@@ -128,32 +128,36 @@ export default function AdminCertificateOfferPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Recipient Name</label>
+                <label htmlFor="certificate-recipient-name" className="block text-xs font-semibold text-slate-700 mb-1">Recipient Name</label>
                 <input
+                  id="certificate-recipient-name"
                   value={recipientName}
                   onChange={(e) => setRecipientName(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 text-xs font-medium text-slate-900 outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Program / Domain</label>
+                <label htmlFor="certificate-program" className="block text-xs font-semibold text-slate-700 mb-1">Program / Domain</label>
                 <input
+                  id="certificate-program"
                   value={program}
                   onChange={(e) => setProgram(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 text-xs font-medium text-slate-900 outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Issued On</label>
+                <label htmlFor="certificate-issued-on" className="block text-xs font-semibold text-slate-700 mb-1">Issued On</label>
                 <input
+                  id="certificate-issued-on"
                   value={issueDate}
                   onChange={(e) => setIssueDate(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 text-xs font-medium text-slate-900 outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Certificate ID</label>
+                <label htmlFor="certificate-id" className="block text-xs font-semibold text-slate-700 mb-1">Certificate ID</label>
                 <input
+                  id="certificate-id"
                   value={certId}
                   onChange={(e) => setCertId(e.target.value)}
                   disabled

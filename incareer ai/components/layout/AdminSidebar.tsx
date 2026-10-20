@@ -122,14 +122,15 @@ export const AdminSidebar: React.FC<{ children: React.ReactNode }> = ({ children
           onClick={() => setMobileOpen(!mobileOpen)}
           className="p-2 rounded-xl text-slate-600 hover:bg-slate-100"
           aria-label="Toggle Admin Navigation"
+          aria-expanded={mobileOpen}
+          aria-controls="admin-mobile-navigation"
         >
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
       {/* Mobile Drawer */}
-      {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-30 pt-16 bg-white">
+      <div id="admin-mobile-navigation" hidden={!mobileOpen} className="lg:hidden fixed inset-0 z-30 pt-16 bg-white">
           <NavList />
           <div className="p-4 border-t border-slate-200/80">
             <button
@@ -140,12 +141,11 @@ export const AdminSidebar: React.FC<{ children: React.ReactNode }> = ({ children
               <span>Sign Out</span>
             </button>
           </div>
-        </div>
-      )}
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 pt-16 lg:pt-0">
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
           {children}
         </main>
       </div>

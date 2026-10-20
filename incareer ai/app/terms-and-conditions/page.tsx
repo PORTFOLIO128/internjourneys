@@ -2,8 +2,20 @@ import type { Metadata } from 'next';
 import { InfoSection, PublicInfoLayout } from '@/components/common/PublicInfoLayout';
 
 export const metadata: Metadata = {
-  title: 'Terms & Conditions | InternJourneys',
+  title: 'Terms & Conditions',
   description: 'Read the terms for using InternJourneys virtual internships and project-based learning services.',
+  alternates: {
+    canonical: '/terms-and-conditions',
+  },
+  openGraph: {
+    title: 'Terms & Conditions',
+    description: 'Read the terms for using InternJourneys virtual internships and project-based learning services.',
+    url: '/terms-and-conditions',
+  },
+  twitter: {
+    title: 'Terms & Conditions',
+    description: 'Read the terms for using InternJourneys virtual internships and project-based learning services.',
+  },
 };
 
 export default function TermsAndConditionsPage() {

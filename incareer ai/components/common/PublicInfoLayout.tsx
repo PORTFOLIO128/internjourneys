@@ -28,13 +28,13 @@ export function PublicInfoLayout({
           <Logo href="/" />
           <nav aria-label="Main navigation" className="flex items-center gap-3 text-xs font-bold sm:gap-5">
             <Link href="/internships" className="hidden text-slate-600 hover:text-indigo-600 sm:inline">Internships</Link>
-            <Link href="/login" className="text-slate-600 hover:text-indigo-600">Sign In</Link>
+            <Link href="/login" className="hidden text-slate-600 hover:text-indigo-600 sm:inline">Sign In</Link>
             <Link href="/register" className="rounded-xl bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700 sm:px-4">Get Started</Link>
           </nav>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
+      <main id="main-content" className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
         <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-card sm:p-10 lg:p-12">
           <header className="mb-9 border-b border-slate-100 pb-7">
             <p className="mb-3 text-xs font-extrabold uppercase tracking-[0.16em] text-indigo-600">InternJourneys</p>
