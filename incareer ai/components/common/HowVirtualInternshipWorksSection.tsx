@@ -26,7 +26,7 @@ export const HowVirtualInternshipWorksSection: React.FC = () => {
       stepNum: '04',
       badgeNum: '4',
       title: 'Earn Certification',
-      description: 'Complete required tasks and pay the ₹199 certificate fee. Your certificate is available after payment verification and eligibility confirmation.',
+      description: 'Complete required tasks and pay the ₹99 certificate fee. Your certificate is available after payment verification and eligibility confirmation.',
     },
   ];
 

@@ -11,7 +11,7 @@ const faqs = [
   },
   {
     q: "What do I need to access my certificate?",
-    a: "Pay the ₹199 certificate fee and complete all required internship tasks to unlock your certificate in the Certifications tab."
+    a: "Pay the ₹99 certificate fee and complete all required internship tasks to unlock your certificate in the Certifications tab."
   },
   {
     q: "How can I share my certificate on LinkedIn?",

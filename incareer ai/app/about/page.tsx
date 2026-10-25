@@ -50,7 +50,7 @@ export default function AboutPage() {
           <li>Browse the active internship domains and choose a learning track.</li>
           <li>Create an account and enroll in a domain.</li>
           <li>Complete the required tasks and submit work for the platform’s configured verification workflow.</li>
-          <li>Complete all required tasks and pay the ₹199 INR certificate fee. The certificate is made available once payment is verified and eligibility is confirmed.</li>
+          <li>Complete all required tasks and pay the ₹99 INR certificate fee. The certificate is made available once payment is verified and eligibility is confirmed.</li>
           <li>Use the certificate identifier on the certificate verification page to check an issued certificate.</li>
         </ol>
       </InfoSection>

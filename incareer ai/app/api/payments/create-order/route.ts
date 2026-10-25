@@ -1,7 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceRoleSupabaseClient } from '@/lib/supabase/server';
-import { CERTIFICATE_FEE_RUPEES, createCashfreeOrder } from '@/lib/payments/cashfree';
+import {
+  CERTIFICATE_FEE_PAIS,
+  CERTIFICATE_FEE_RUPEES,
+  createRazorpayOrder,
+  inspectRazorpayOrder,
+} from '@/lib/payments/razorpay';
 
 export const runtime = 'nodejs';
 
@@ -18,18 +23,25 @@ function normalizeIndianPhone(phone: string | null | undefined) {
 }
 
 export async function POST(request: Request) {
+  let stage = 'checking your account';
   const accessToken = getAccessToken(request);
   if (!accessToken) {
     return NextResponse.json({ error: 'Please sign in before paying.' }, { status: 401 });
   }
 
-  if (
-    !process.env.CASHFREE_CLIENT_ID ||
-    !process.env.CASHFREE_CLIENT_SECRET ||
-    !process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    !process.env.NEXT_PUBLIC_SITE_URL
-  ) {
-    return NextResponse.json({ error: 'Sandbox payment processing is not configured.' }, { status: 503 });
+  const requiredEnv = [
+    'RAZORPAY_KEY_ID',
+    'RAZORPAY_KEY_SECRET',
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
+  ].filter((key) => !process.env[key]);
+
+  if (requiredEnv.length) {
+    return NextResponse.json(
+      { error: `Payment backend is not configured. Missing env: ${requiredEnv.join(', ')}` },
+      { status: 503 }
+    );
   }
 
   try {
@@ -75,42 +87,106 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'The certificate fee has already been paid.' }, { status: 409 });
     }
 
-    const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL);
-    if (!['http:', 'https:'].includes(siteUrl.protocol)) {
-      return NextResponse.json({ error: 'The site URL is not configured correctly.' }, { status: 503 });
+    stage = 'checking your previous payment attempt';
+    const { data: pendingPayments, error: pendingLookupError } = await serviceSupabase
+      .from('payments')
+      .select('id, provider_order_id')
+      .eq('student_id', user.id)
+      .eq('purpose', 'Certificate fee')
+      .eq('provider', 'razorpay')
+      .eq('status', 'Pending')
+      .not('provider_order_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    if (pendingLookupError) throw pendingLookupError;
+
+    for (const pendingPayment of pendingPayments || []) {
+      if (!pendingPayment.provider_order_id) continue;
+      let previousAttempt;
+      try {
+        previousAttempt = await inspectRazorpayOrder(
+          pendingPayment.provider_order_id,
+          CERTIFICATE_FEE_PAIS
+        );
+      } catch (inspectError) {
+        console.warn(`Could not inspect previous order ${pendingPayment.provider_order_id}:`, inspectError);
+        await serviceSupabase
+          .from('payments')
+          .update({ status: 'Failed', paid_at: null })
+          .eq('id', pendingPayment.id)
+          .eq('status', 'Pending');
+        continue;
+      }
+
+      if (previousAttempt.disposition === 'Completed' && previousAttempt.capturedPayment) {
+        const { error: completionError } = await serviceSupabase
+          .from('payments')
+          .update({
+            status: 'Completed',
+            provider_payment_id: previousAttempt.capturedPayment.id,
+            paid_at: new Date().toISOString(),
+          })
+          .eq('id', pendingPayment.id)
+          .eq('status', 'Pending');
+        if (completionError) throw completionError;
+        return NextResponse.json({ error: 'The certificate fee has already been paid.' }, { status: 409 });
+      }
+
+      if (previousAttempt.disposition === 'Pending') {
+        return NextResponse.json(
+          { error: 'Your previous payment attempt is still being processed. Check its status before paying again.' },
+          { status: 409 }
+        );
+      }
+
+      const resolvedStatus = previousAttempt.disposition === 'Cancelled'
+        ? 'Failed'
+        : previousAttempt.disposition;
+      const providerPaymentId = previousAttempt.failedPayment?.id || null;
+      const { error: resolveError } = await serviceSupabase
+        .from('payments')
+        .update({
+          status: resolvedStatus,
+          provider_payment_id: providerPaymentId,
+          paid_at: null,
+        })
+        .eq('id', pendingPayment.id)
+        .eq('status', 'Pending');
+      if (resolveError) throw resolveError;
     }
 
-    const orderId = `IJ-${randomUUID().replace(/-/g, '')}`;
-    const returnUrl = `${new URL('/dashboard/payments', siteUrl).toString()}?order_id={order_id}`;
+    const receipt = `cert-${user.id.slice(0, 8)}-${Date.now().toString().slice(-8)}`;
+    stage = 'creating the Razorpay order';
+    const order = await createRazorpayOrder(receipt, CERTIFICATE_FEE_PAIS);
 
-    const order = await createCashfreeOrder(orderId, {
-      id: user.id.replace(/-/g, ''),
-      name: profile?.full_name || user.user_metadata?.full_name || 'InternJourneys student',
-      email: user.email,
-      phone,
-    }, returnUrl);
-
-    if (order.order_id !== orderId || !order.payment_session_id) {
-      throw new Error('Cashfree returned an invalid order response.');
+    if (order.amount !== CERTIFICATE_FEE_PAIS || order.currency !== 'INR') {
+      throw new Error('Razorpay returned an invalid order response.');
     }
 
+    stage = 'saving your pending payment record';
     const { error: insertError } = await serviceSupabase.from('payments').insert({
+      id: randomUUID(),
       student_id: user.id,
       amount: CERTIFICATE_FEE_RUPEES,
       currency: 'INR',
       purpose: 'Certificate fee',
-      provider: 'cashfree',
-      provider_order_id: orderId,
+      provider: 'razorpay',
+      provider_order_id: order.order_id,
       status: 'Pending',
     });
     if (insertError) throw insertError;
 
     return NextResponse.json({
-      orderId,
-      paymentSessionId: order.payment_session_id,
+      orderId: order.order_id,
+      amount: order.amount,
+      currency: order.currency,
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
-    console.error('Could not create Cashfree certificate payment order:', error);
-    return NextResponse.json({ error: 'Could not start payment. Please try again.' }, { status: 500 });
+    console.error('Could not create Razorpay certificate payment order:', error);
+    return NextResponse.json(
+      { error: `Could not finish ${stage}. Please check payment status before retrying.` },
+      { status: 500 }
+    );
   }
 }

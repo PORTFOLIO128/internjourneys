@@ -224,7 +224,7 @@ export const mockPayment: PaymentItem = {
   id: "pay_100",
   title: "Certificate Processing Fee",
   purpose: "Certificate fee",
-  amount: 199,
+  amount: 99,
   currency: "INR",
   status: "Pending",
   dueDate: "Immediate"

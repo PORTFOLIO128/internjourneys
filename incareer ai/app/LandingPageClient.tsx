@@ -113,7 +113,7 @@ export default function LandingPageClient() {
 
               {/* Subtitle */}
               <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
-                Learn through structured virtual internships, guided project tasks, and work submissions. Enrollment is free; certificate issuance requires all tasks to be complete and the ₹199 INR fee to be successfully verified.
+                Learn through structured virtual internships, guided project tasks, and work submissions. Enrollment is free; certificate issuance requires all tasks to be complete and the ₹99 INR fee to be successfully verified.
               </p>
 
               {/* Action Buttons */}

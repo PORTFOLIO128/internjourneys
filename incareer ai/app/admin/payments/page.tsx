@@ -200,8 +200,15 @@ export default function AdminPaymentsPage() {
                           {savingId === p.id ? 'Saving...' : 'Mark Paid'}
                         </button>
                       )}
-                      {(p.status === 'Pending' || p.status === 'Failed') && p.purpose === 'Certificate fee' && (
-                        <span className="text-xs font-medium text-slate-500">Awaiting provider verification</span>
+                      {p.status === 'Pending' && p.purpose === 'Certificate fee' && (
+                        <span className="text-xs font-medium text-slate-500">Awaiting provider confirmation</span>
+                      )}
+                      {p.status === 'Failed' && p.purpose === 'Certificate fee' && (
+                        <span className="text-xs font-medium text-rose-600">
+                          {p.transactionId?.startsWith('order_')
+                            ? 'Checkout closed before payment attempt'
+                            : 'Provider confirmed failure'}
+                        </span>
                       )}
                       {p.status === 'Completed' && (
                         <button
@@ -213,7 +220,7 @@ export default function AdminPaymentsPage() {
                           Refund
                         </button>
                       )}
-                      {p.status === 'Pending' && (
+                      {p.status === 'Pending' && p.purpose !== 'Certificate fee' && (
                         <button
                           onClick={() => updateStatus(p.id, 'Failed')}
                           disabled={savingId === p.id}

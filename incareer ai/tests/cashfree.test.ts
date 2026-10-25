@@ -12,7 +12,7 @@ import {
 
 const paidOrder: CashfreeOrder = {
   order_id: 'IJ-test-order',
-  order_amount: 199,
+  order_amount: 99,
   order_currency: 'INR',
   order_status: 'PAID',
 };
@@ -21,7 +21,7 @@ const successfulPayment: CashfreePayment = {
   cf_payment_id: 'cf-payment-123',
   order_id: paidOrder.order_id,
   payment_status: 'SUCCESS',
-  payment_amount: 199,
+  payment_amount: 99,
   payment_currency: 'INR',
 };
 
@@ -45,7 +45,7 @@ test('does not accept a forged browser success response as provider confirmation
 test('rejects Cashfree orders or payments with an incorrect amount', () => {
   assert.equal(
     findSuccessfulCashfreePayment(
-      { ...paidOrder, order_amount: 198 },
+      { ...paidOrder, order_amount: 98 },
       [successfulPayment],
       paidOrder.order_id
     ),
@@ -54,7 +54,7 @@ test('rejects Cashfree orders or payments with an incorrect amount', () => {
   assert.equal(
     findSuccessfulCashfreePayment(
       paidOrder,
-      [{ ...successfulPayment, payment_amount: 198 }],
+      [{ ...successfulPayment, payment_amount: 98 }],
       paidOrder.order_id
     ),
     null

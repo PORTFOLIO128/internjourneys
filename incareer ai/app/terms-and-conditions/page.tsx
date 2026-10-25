@@ -46,7 +46,7 @@ export default function TermsAndConditionsPage() {
       </InfoSection>
 
       <InfoSection title="5. Certificate eligibility and fee">
-        <p>The certificate processing fee is ₹199 INR. The fee is displayed before checkout. A certificate is eligible for issuance only after all required tasks for the relevant internship are complete and the payment has been successfully verified by the payment provider and InternJourneys.</p>
+        <p>The certificate processing fee is ₹99 INR. The fee is displayed before checkout. A certificate is eligible for issuance only after all required tasks for the relevant internship are complete and the payment has been successfully verified by the payment provider and InternJourneys.</p>
         <p>After successful payment verification and confirmation of task eligibility, the certificate becomes available through the platform. Incomplete tasks, provider delays, discrepancies in payment records or technical issues can delay availability. A browser redirect alone is not payment confirmation.</p>
       </InfoSection>
 
