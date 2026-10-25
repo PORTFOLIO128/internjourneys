@@ -3,7 +3,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 const CASHFREE_API_BASE_URL = 'https://sandbox.cashfree.com/pg';
 const CASHFREE_API_VERSION = '2023-08-01';
 
-export const CERTIFICATE_FEE_RUPEES = 199;
+export const CERTIFICATE_FEE_RUPEES = 99;
 
 export interface CashfreeOrder {
   order_id: string;

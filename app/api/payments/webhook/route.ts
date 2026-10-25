@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServiceRoleSupabaseClient } from '@/lib/supabase/server';
 import {
+  CERTIFICATE_FEE_RUPEES,
   fetchCashfreeOrder,
   fetchCashfreeOrderPayments,
   findFailedCashfreePayment,
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
     if (lookupError) throw lookupError;
     if (!paymentRecord) return NextResponse.json({ received: true });
     if (
-      paymentRecord.amount !== 199 ||
+      paymentRecord.amount !== CERTIFICATE_FEE_RUPEES ||
       paymentRecord.currency !== 'INR' ||
       paymentRecord.purpose !== 'Certificate fee'
     ) {

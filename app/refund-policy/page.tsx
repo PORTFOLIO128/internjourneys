@@ -22,11 +22,11 @@ export default function RefundPolicyPage() {
   return (
     <PublicInfoLayout
       title="Refund & Cancellation Policy"
-      description="This policy explains the ₹199 certificate fee and how to report duplicate, failed, pending or otherwise disputed payments."
+      description="This policy explains the ₹99 certificate fee and how to report duplicate, failed, pending or otherwise disputed payments."
       updatedAt="2 June 2026"
     >
       <InfoSection title="1. Certificate fee and eligibility">
-        <p>The certificate processing fee is ₹199 INR and is shown before checkout. Students must complete all required internship tasks and have a successful payment verified by the payment provider and InternJourneys before the certificate is issued. A pending payment or browser checkout message alone does not establish eligibility.</p>
+        <p>The certificate processing fee is ₹99 INR and is shown before checkout. Students must complete all required internship tasks and have a successful payment verified by the payment provider and InternJourneys before the certificate is issued. A pending payment or browser checkout message alone does not establish eligibility.</p>
       </InfoSection>
 
       <InfoSection title="2. Suspected duplicate payments">

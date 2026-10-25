@@ -199,13 +199,13 @@ export default function CertificationsPage() {
                 <Link href="/help" className="text-sm font-bold text-indigo-600 hover:text-indigo-700">Contact support</Link>
               ) : (
                 <>
-                  <p className="text-sm text-slate-600">Pay ₹199. Your certificate unlocks after payment and verification of all required tasks.</p>
+                  <p className="text-sm text-slate-600">Pay ₹99. Your certificate unlocks after payment and verification of all required tasks.</p>
                   <Link
                     href="/dashboard/payments?purpose=certificate"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-700"
                   >
                     <IndianRupee className="h-4 w-4" />
-                    <span>Pay Now · ₹199</span>
+                    <span>Pay Now · ₹99</span>
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </>

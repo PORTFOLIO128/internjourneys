@@ -59,10 +59,10 @@ export const offerLetterTemplates: OfferLetterTemplate[] = [
 ];
 
 export const adminPayments: AdminPayment[] = [
-  { id: 'pay-201', studentName: 'Hari Narayan S', internId: 'CAI45872', purpose: 'Certificate fee', amount: 199, currency: 'INR', status: 'Completed', date: '26 Aug 2026', transactionId: 'TXN-88231' },
-  { id: 'pay-202', studentName: 'Sneha Reddy', internId: 'CAI45875', purpose: 'Certificate fee', amount: 199, currency: 'INR', status: 'Completed', date: '25 Aug 2026', transactionId: 'TXN-88197' },
-  { id: 'pay-203', studentName: 'Priya Sharma', internId: 'CAI45873', purpose: 'Certificate fee', amount: 199, currency: 'INR', status: 'Pending', date: '24 Aug 2026' },
-  { id: 'pay-204', studentName: 'Anand Kumar', internId: 'CAI45874', purpose: 'Certificate fee', amount: 199, currency: 'INR', status: 'Failed', date: '23 Aug 2026', transactionId: 'TXN-88045' },
-  { id: 'pay-205', studentName: 'Rahul Verma', internId: 'CAI45876', purpose: 'Certificate fee', amount: 199, currency: 'INR', status: 'Completed', date: '22 Aug 2026', transactionId: 'TXN-87966' },
-  { id: 'pay-206', studentName: 'Manoj Pillai', internId: 'CAI45878', purpose: 'Certificate fee', amount: 199, currency: 'INR', status: 'Refunded', date: '20 Aug 2026', transactionId: 'TXN-87720' },
+  { id: 'pay-201', studentName: 'Hari Narayan S', internId: 'CAI45872', purpose: 'Certificate fee', amount: 99, currency: 'INR', status: 'Completed', date: '26 Aug 2026', transactionId: 'TXN-88231' },
+  { id: 'pay-202', studentName: 'Sneha Reddy', internId: 'CAI45875', purpose: 'Certificate fee', amount: 99, currency: 'INR', status: 'Completed', date: '25 Aug 2026', transactionId: 'TXN-88197' },
+  { id: 'pay-203', studentName: 'Priya Sharma', internId: 'CAI45873', purpose: 'Certificate fee', amount: 99, currency: 'INR', status: 'Pending', date: '24 Aug 2026' },
+  { id: 'pay-204', studentName: 'Anand Kumar', internId: 'CAI45874', purpose: 'Certificate fee', amount: 99, currency: 'INR', status: 'Failed', date: '23 Aug 2026', transactionId: 'TXN-88045' },
+  { id: 'pay-205', studentName: 'Rahul Verma', internId: 'CAI45876', purpose: 'Certificate fee', amount: 99, currency: 'INR', status: 'Completed', date: '22 Aug 2026', transactionId: 'TXN-87966' },
+  { id: 'pay-206', studentName: 'Manoj Pillai', internId: 'CAI45878', purpose: 'Certificate fee', amount: 99, currency: 'INR', status: 'Refunded', date: '20 Aug 2026', transactionId: 'TXN-87720' },
 ];

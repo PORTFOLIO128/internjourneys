@@ -11,19 +11,19 @@ npm install
 npm run dev
 ```
 
-Configure the existing Supabase public URL and anon key for the app. Cashfree checkout is currently configured for sandbox and additionally requires these server-side variables:
+Configure the existing Supabase public URL and anon key for the app. Razorpay Standard Checkout requires:
 
-- `CASHFREE_CLIENT_ID`
-- `CASHFREE_CLIENT_SECRET`
-- `CASHFREE_WEBHOOK_SECRET`
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+- `RAZORPAY_WEBHOOK_SECRET`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `NEXT_PUBLIC_SITE_URL`
 
-Never expose Cashfree credentials or the Supabase service-role key to client-side code.
+Only the Razorpay key ID may be exposed to the browser. Never expose the Razorpay key secret, webhook secret, or Supabase service-role key to client-side code.
 
 ## Payments and database
 
-Certificate checkout uses a fixed ₹199 INR amount. Apply the additive SQL migration in `supabase/migrations` through a reviewed database deployment process before enabling payment completion. The migration is not applied automatically by the app.
+Certificate checkout uses a fixed ₹99 INR amount. Configure Razorpay webhooks to send `payment.captured` and `payment.failed` events to `/api/payments/razorpay-webhook`. Keep unresolved orders pending; mark a payment failed only after Razorpay confirms failure or confirms that Checkout closed before any payment attempt. No additional payment-status database migration is required.
 
 ## Checks
 
