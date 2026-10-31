@@ -1,3 +1,5 @@
+import { ADDITIONAL_DOMAIN_SLUGS } from '@/data/mockData';
+
 export const SITE_URL = 'https://internjourneys.in';
 
 export const STATIC_SITEMAP_PATHS = [
@@ -17,7 +19,7 @@ export function canonicalUrl(path: string): string {
 
 export function sitemapUrls(domainSlugs: readonly string[]): string[] {
   const domainPaths = Array.from(
-    new Set(domainSlugs),
+    new Set([...domainSlugs, ...ADDITIONAL_DOMAIN_SLUGS]),
     (slug) => `/domains/${encodeURIComponent(slug)}`
   );
 

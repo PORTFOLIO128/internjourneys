@@ -86,6 +86,82 @@ h1, h2, h3 {
   animation: marquee-reverse 30s linear infinite;
 }
 
+.batch-announcement__track {
+  animation: batch-announcement-scroll 34s linear infinite;
+}
+
+.batch-announcement:hover .batch-announcement__track {
+  animation-play-state: paused;
+}
+
+@keyframes batch-announcement-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.nav-link {
+  position: relative;
+  padding-block: 0.5rem;
+  transition: color 180ms ease;
+}
+
+.nav-link::after {
+  position: absolute;
+  right: 50%;
+  bottom: 0;
+  left: 50%;
+  height: 2px;
+  border-radius: 9999px;
+  background: #1d61ff;
+  content: "";
+  transition: left 180ms ease, right 180ms ease;
+}
+
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  right: 0;
+  left: 0;
+}
+
+.nav-cta-primary,
+.nav-cta-secondary {
+  position: relative;
+  overflow: hidden;
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.nav-cta-primary::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.32) 48%, transparent 76%);
+  content: "";
+  transform: translateX(-130%);
+  transition: transform 550ms ease;
+}
+
+.nav-cta-primary:hover::after {
+  transform: translateX(130%);
+}
+
+.nav-cta-primary:hover,
+.nav-cta-secondary:hover {
+  transform: translateY(-2px);
+}
+
+.nav-cta-primary:hover {
+  box-shadow: 0 10px 24px rgba(29, 97, 255, 0.3);
+}
+
+.nav-cta-secondary:hover {
+  border-color: #93c5fd;
+  background-color: rgba(239, 246, 255, 0.8);
+}
+
+.nav-cta-primary:active,
+.nav-cta-secondary:active {
+  transform: translateY(0) scale(0.97);
+}
+
 .animate-marquee:hover, .animate-marquee-fast:hover, .animate-marquee-reverse:hover {
   animation-play-state: paused;
 }
@@ -107,6 +183,14 @@ h1, h2, h3 {
   background: radial-gradient(circle at 80% 30%, rgba(224, 231, 255, 0.6) 0%, rgba(248, 250, 252, 0.3) 60%, rgba(255, 255, 255, 1) 100%);
 }
 
+@media (max-width: 640px) {
+  .bg-hero-curved-swoosh {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(219, 234, 254, 0.85) 0%, rgba(238, 242, 255, 0.5) 42%, transparent 76%),
+      linear-gradient(180deg, #f8faff 0%, #ffffff 78%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto !important;
@@ -117,7 +201,33 @@ h1, h2, h3 {
   .animate-marquee-reverse,
   .animate-float-gentle,
   .animate-float-slow,
-  .animate-pulse-glow {
+  .animate-pulse-glow,
+  .batch-announcement__track,
+  .nav-link,
+  .nav-link::after,
+  .nav-cta-primary,
+  .nav-cta-secondary,
+  .nav-cta-primary::after {
     animation: none !important;
+    transition: none !important;
   }
+}
+
+/* Blob spin animation for login/register backgrounds */
+@keyframes blob-spin {
+  0%   { transform: scale(1) rotate(0deg); }
+  33%  { transform: scale(1.12) rotate(120deg); }
+  66%  { transform: scale(0.9) rotate(240deg); }
+  100% { transform: scale(1) rotate(360deg); }
+}
+
+/* Shimmer / skeleton loading effect */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
 }

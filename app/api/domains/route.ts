@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getCached, setCached } from '@/lib/redis';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { getFallbackDomainRows } from '@/lib/supabase/fallbackDomains';
+import type { DomainRow } from '@/lib/supabase/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,9 +10,16 @@ const CACHE_KEY = 'careerai:domains';
 const DOMAINS_TTL_SECONDS = 10 * 60;
 
 export async function GET() {
-  const cached = await getCached(CACHE_KEY);
-  if (cached) return NextResponse.json(cached);
+  const cached = await getCached<DomainRow[]>(CACHE_KEY);
+  if (cached) {
+    const domainsBySlug = new Map(cached.map((domain) => [domain.slug, domain]));
+    for (const domain of getFallbackDomainRows()) {
+      if (!domainsBySlug.has(domain.slug)) domainsBySlug.set(domain.slug, domain);
+    }
+    return NextResponse.json(Array.from(domainsBySlug.values()));
+  }
 
+  let domains: DomainRow[] = [];
   try {
     const supabase = createServerSupabaseClient();
     const { data, error } = await supabase
@@ -24,10 +33,17 @@ export async function GET() {
 
     if (error) throw error;
     console.info('[domains] SUPABASE FETCH active domains');
-    await setCached(CACHE_KEY, data || [], DOMAINS_TTL_SECONDS);
-    return NextResponse.json(data || []);
+    domains = (data || []) as DomainRow[];
   } catch (error) {
-    console.error('[domains] SUPABASE FETCH FAILED', error);
-    return NextResponse.json({ error: 'Could not load internship domains.' }, { status: 500 });
+    console.warn('[domains] SUPABASE FETCH FAILED; serving the static domain catalog.', error);
   }
+
+  const domainsBySlug = new Map(domains.map((domain) => [domain.slug, domain]));
+  for (const domain of getFallbackDomainRows()) {
+    if (!domainsBySlug.has(domain.slug)) domainsBySlug.set(domain.slug, domain);
+  }
+
+  const response = Array.from(domainsBySlug.values());
+  await setCached(CACHE_KEY, response, DOMAINS_TTL_SECONDS);
+  return NextResponse.json(response);
 }

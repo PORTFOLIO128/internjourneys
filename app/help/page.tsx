@@ -119,7 +119,7 @@ export default function HelpPage() {
             </div>
           </div>
           <a
-            href="mailto:bhuvaneshbhuvan128@gmail.com"
+            href="mailto:internjourney26@gmail.com"
             className="px-5 py-2.5 rounded-xl bg-white text-slate-900 font-bold text-xs hover:bg-slate-100 transition-colors"
           >
             Contact Support

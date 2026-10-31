@@ -1,30 +1,69 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Logo } from '@/components/common/Logo';
 import { CompanyLogosMarquee } from '@/components/common/CompanyLogosMarquee';
-import { MovableNoticeBanner } from '@/components/common/MovableNoticeBanner';
 import { HowVirtualInternshipWorksSection } from '@/components/common/HowVirtualInternshipWorksSection';
 import { SimpleDomainsSection } from '@/components/common/SimpleDomainsSection';
 import { VerifyCertificateSection } from '@/components/common/VerifyCertificateSection';
 import { LiveRegistrationToast } from '@/components/common/LiveRegistrationToast';
+import { CountUpNumber } from '@/components/common/CountUpNumber';
+import { getRollingBatchDate } from '@/utils/batchDate';
 import {
   ArrowRight,
   FileText,
   ShieldCheck,
   Users,
-  Play,
   BarChart2,
-  BadgeCheck,
   Activity,
   ChevronDown,
   ChevronUp,
-  LogIn,
+  Clock,
+  Menu,
+  X,
 } from 'lucide-react';
 
-export default function LandingPageClient() {
+export default function LandingPageClient({
+  initialBatchStartDate,
+}: {
+  initialBatchStartDate: string;
+}) {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [batchStartDate, setBatchStartDate] = useState(initialBatchStartDate);
+  const shouldReduceMotion = useReducedMotion();
+
+  // Keep the displayed date fresh while the page remains open.
+  useEffect(() => {
+    const updateBatchDate = () => setBatchStartDate(getRollingBatchDate());
+    const dateUpdateInterval = window.setInterval(updateBatchDate, 60_000);
+    return () => window.clearInterval(dateUpdateInterval);
+  }, []);
+
+  // Lock body scroll when mobile navigation drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
+  // Close mobile navigation drawer on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen]);
 
   const landingFaqs = [
     {
@@ -45,7 +84,7 @@ export default function LandingPageClient() {
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
       {/* 1. MAIN HEADER NAVIGATION NAVBAR */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
+      <header className="sticky top-0 z-40 border-b border-white/60 bg-white/70 shadow-[0_8px_24px_rgba(15,23,42,0.06)] backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 
           {/* Logo */}
@@ -53,41 +92,167 @@ export default function LandingPageClient() {
             <Logo href="/" />
           </div>
 
-          {/* Center Navigation Links */}
+          {/* Desktop Center Navigation Links (Kept strictly intact) */}
           <nav className="hidden lg:flex items-center gap-8 text-xs font-extrabold text-slate-700">
-            <a href="#how-it-works" className="hover:text-[#1d61ff] transition-colors">How It Works</a>
-            <a href="#domains" className="hover:text-[#1d61ff] transition-colors">Domains</a>
-            <a href="#workflow" className="hover:text-[#1d61ff] transition-colors">Workflow</a>
-            <a href="#verify-cert" className="hover:text-[#1d61ff] transition-colors">Verify Cert</a>
-            <a href="#faq" className="hover:text-[#1d61ff] transition-colors">FAQ</a>
+            <a href="#how-it-works" className="nav-link hover:text-[#1d61ff]">How It Works</a>
+            <a href="#domains" className="nav-link hover:text-[#1d61ff]">Domains</a>
+            <a href="#workflow" className="nav-link hover:text-[#1d61ff]">Workflow</a>
+            <a href="#verify-cert" className="nav-link hover:text-[#1d61ff]">Verify Cert</a>
+            <a href="#faq" className="nav-link hover:text-[#1d61ff]">FAQ</a>
           </nav>
 
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-1 sm:gap-3">
+          {/* Desktop Right Action Buttons (Kept strictly intact) */}
+          <div className="hidden lg:flex items-center gap-3">
             <Link
               href="/login"
               aria-label="Sign in"
-              className="inline-flex items-center justify-center px-3 py-2.5 sm:px-5 rounded-full border border-slate-300 hover:border-slate-400 text-xs font-extrabold text-slate-800 hover:bg-slate-50 transition-all shadow-2xs"
+              className="nav-cta-secondary inline-flex items-center justify-center px-5 py-2.5 rounded-full border border-slate-300 text-xs font-extrabold text-slate-800 shadow-2xs"
             >
-              <LogIn className="w-4 h-4 min-[390px]:hidden" />
-              <span className="hidden min-[390px]:inline">Sign In</span>
+              <span>Sign In</span>
             </Link>
 
             <Link
               href="/internships"
               aria-label="Explore internships"
-              className="inline-flex items-center gap-1.5 px-3 py-2.5 sm:px-6 rounded-full bg-[#1d61ff] hover:bg-[#1650d4] text-white font-extrabold text-xs shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95"
+              className="nav-cta-primary inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-[#1d61ff] text-white font-extrabold text-xs shadow-md shadow-blue-500/20"
             >
-              <span className="whitespace-nowrap sm:hidden">Explore</span>
-              <span className="hidden whitespace-nowrap sm:inline">Explore Internships</span>
-              <ArrowRight className="hidden w-3.5 h-3.5 sm:block" />
+              <span>Explore Internships</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
+          </div>
+
+          {/* Mobile Right Controls: [Get Started Now] [☰ Hamburger] (Mobile Only) */}
+          <div className="flex lg:hidden items-center gap-2 sm:gap-3">
+            <Link
+              href="/register"
+              className="nav-cta-primary inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 rounded-full bg-[#1D61FF] text-white font-extrabold text-[11px] sm:text-xs shadow-sm shadow-blue-500/25 whitespace-nowrap"
+            >
+              Get Started Now
+            </Link>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
+              className="inline-flex items-center justify-center w-9 h-9 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors focus-visible:outline-2 focus-visible:outline-[#1D61FF]"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* 2. MOVABLE NOTICE BANNER BELOW NAVBAR */}
-      <MovableNoticeBanner />
+      <aside
+        aria-label={`New batch starts ${batchStartDate}. Registration is open.`}
+        className="batch-announcement relative z-30 overflow-hidden bg-gradient-to-r from-red-700 via-red-800 to-red-700 text-white shadow-sm"
+      >
+        <div className="batch-announcement__track flex w-max items-center whitespace-nowrap py-2 text-[11px] font-extrabold sm:text-xs">
+          {[0, 1].map((copy) => (
+            <div
+              key={copy}
+              aria-hidden={copy === 1}
+              className="flex shrink-0 items-center gap-4 pr-4 sm:gap-7 sm:pr-7"
+            >
+              <span className="uppercase tracking-wide">New Batch Starting</span>
+              <span className="text-amber-300">IN 1 DAY</span>
+              <span className="text-white/70">|</span>
+              <time className="text-amber-200" suppressHydrationWarning>
+                {batchStartDate}
+              </time>
+              <span className="text-white/70">|</span>
+              <span>Registration Open</span>
+              <Link
+                href="/register"
+                tabIndex={copy === 1 ? -1 : undefined}
+                className="rounded-full bg-amber-300 px-3 py-1 font-black text-blue-950 transition-colors hover:bg-amber-200"
+              >
+                Get Started Free
+              </Link>
+            </div>
+          ))}
+        </div>
+      </aside>
+
+      {/* Mobile Navigation Drawer & Backdrop */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs lg:hidden"
+              aria-hidden="true"
+            />
+
+            {/* Slide-out Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+              className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-white shadow-2xl flex flex-col lg:hidden border-l border-slate-200"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile Navigation"
+            >
+              {/* Drawer Header */}
+              <div className="h-20 px-6 border-b border-slate-100 flex items-center justify-between">
+                <Logo href="/" subtitle={false} />
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                  aria-label="Close navigation menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Drawer Navigation Links */}
+              <nav className="flex-1 overflow-y-auto px-6 py-6 space-y-1 text-sm font-bold text-slate-700">
+                {[
+                  { label: 'Home', href: '/' },
+                  { label: 'How It Works', href: '#how-it-works' },
+                  { label: 'Domains', href: '#domains' },
+                  { label: 'Workflow', href: '#workflow' },
+                  { label: 'Verify Certificate', href: '#verify-cert' },
+                  { label: 'FAQ', href: '#faq' },
+                  { label: 'Sign In', href: '/login' },
+                ].map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-3 px-3 rounded-xl hover:bg-blue-50/80 hover:text-[#1D61FF] transition-colors"
+                  >
+                    <span>{item.label}</span>
+                    <ArrowRight className="w-4 h-4 text-slate-400" />
+                  </a>
+                ))}
+              </nav>
+
+              {/* Drawer Footer CTA */}
+              <div className="p-6 border-t border-slate-100 space-y-3">
+                <Link
+                  href="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-4 rounded-full bg-[#1D61FF] hover:bg-[#1650D4] text-white font-extrabold text-sm shadow-md shadow-blue-500/25 transition-all active:scale-95"
+                >
+                  <span>Get Started Now</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <p className="text-center text-[11px] text-slate-400 font-medium">
+                  100% Free Verified Virtual Internship
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <main id="main-content">
       {/* 3. HERO SECTION */}
@@ -99,75 +264,116 @@ export default function LandingPageClient() {
             <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
 
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-[#E8EEFF] text-[#1D61FF] border border-[#CBDCFD] shadow-2xs">
+              <motion.div
+                initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0, ease: 'easeOut' }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-[#E8EEFF] text-[#1D61FF] border border-[#CBDCFD] shadow-2xs will-change-transform"
+              >
                 <span className="text-base">🎓</span>
-                <span>The Next-Gen Virtual Internship Platform</span>
-              </div>
+                <span>JOIN STUDENTS BUILDING FUTURE-READY SKILLS</span>
+              </motion.div>
 
               {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0F172A] tracking-tight leading-[1.12]">
-                Build Job-Ready Skills <br />
-                with <span className="text-[#1D61FF] font-black">Free Enrollment</span> <br />
-                Virtual Internships
-              </h1>
+              <motion.h1
+                initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.1, ease: 'easeOut' }}
+                className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0F172A] tracking-tight leading-[1.12] will-change-transform"
+              >
+                100% Free <span className="text-[#1D61FF]">Verified Virtual Internship</span> 2026 <br className="hidden sm:inline" />
+                <span className="text-slate-800">| Pan-India</span>
+              </motion.h1>
 
-              {/* Subtitle */}
-              <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
-                Learn through structured virtual internships, guided project tasks, and work submissions. Enrollment is free; certificate issuance requires all tasks to be complete and the ₹99 INR fee to be successfully verified.
-              </p>
+              {/* Dynamic Batch Announcement Pill */}
+              <motion.div
+                initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-50/90 via-indigo-50/90 to-blue-50/90 text-blue-900 border border-blue-200/80 shadow-xs hover:shadow-sm transition-all will-change-transform"
+              >
+                <Clock className="w-3.5 h-3.5 text-[#1D61FF] animate-pulse shrink-0" />
+                <span className="tracking-tight" suppressHydrationWarning>
+                  New Batch Starts: <span className="font-extrabold text-[#1D61FF]">{batchStartDate}</span> | Registration Open
+                </span>
+              </motion.div>
+
+              {/* Subtitle / Description */}
+              <motion.p
+                initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
+                className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed will-change-transform"
+              >
+                Apply free, learn free, and complete your virtual internship. Choose from available domains, get an instant offer letter, and build real project experience online with InternJourneys.
+              </motion.p>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+              <motion.div
+                initial={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.4, ease: 'easeOut' }}
+                className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2"
+              >
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#1D61FF] hover:bg-[#1650D4] text-white font-extrabold text-sm shadow-lg shadow-blue-500/25 transition-all hover:scale-105 active:scale-95"
+                  className="group relative inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#1D61FF] hover:bg-[#1650D4] active:bg-[#1343B8] text-white font-extrabold text-sm shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden select-none"
                 >
-                  <span>Explore Internships</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span className="relative z-10">Get Started Now (It&apos;s Free)</span>
+                  <ArrowRight className="w-4 h-4 relative z-10 transition-transform duration-200 group-hover:translate-x-1" />
+                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
                 </Link>
 
                 <a
-                  href="#workflow"
-                  className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border border-slate-200/90 font-extrabold text-sm shadow-xs transition-colors"
+                  href="#domains"
+                  className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-800 hover:text-[#1D61FF] border border-slate-200/90 hover:border-blue-300 font-extrabold text-sm shadow-xs hover:shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 select-none"
                 >
-                  <div className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center text-[#1D61FF]">
-                    <Play className="w-3 h-3 fill-current ml-0.5" />
-                  </div>
-                  <span>How It Works</span>
+                  <span>Explore Domains</span>
+                  <span className="text-[#1D61FF] font-bold transition-transform duration-200 group-hover:translate-x-1">→</span>
                 </a>
-              </div>
+              </motion.div>
 
-              {/* Features Checklist */}
-              <div className="pt-6 border-t border-slate-200/80 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-600 font-bold">
-                <div className="flex items-center gap-2 bg-white/60 px-3 py-1.5 rounded-full border border-slate-200/60">
+              {/* Trust Indicators */}
+              <motion.div
+                initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.36, ease: 'easeOut' }}
+                className="pt-6 border-t border-slate-200/80 flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-xs text-slate-600 font-bold"
+              >
+                <div className="flex items-center gap-2 bg-white/70 px-3.5 py-1.5 rounded-full border border-slate-200/70 shadow-2xs transition-transform hover:scale-105">
+                  <ShieldCheck className="w-4 h-4 text-[#1D61FF]" />
+                  <span>Verified Program</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/70 px-3.5 py-1.5 rounded-full border border-slate-200/70 shadow-2xs transition-transform hover:scale-105">
                   <FileText className="w-4 h-4 text-[#1D61FF]" />
                   <span>Instant Offer Letter</span>
                 </div>
-                <div className="flex items-center gap-2 bg-white/60 px-3 py-1.5 rounded-full border border-slate-200/60">
-                  <ShieldCheck className="w-4 h-4 text-[#1D61FF]" />
-                  <span>Verified Certificate</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/60 px-3 py-1.5 rounded-full border border-slate-200/60">
+                <div className="flex items-center gap-2 bg-white/70 px-3.5 py-1.5 rounded-full border border-slate-200/70 shadow-2xs transition-transform hover:scale-105">
                   <Users className="w-4 h-4 text-[#1D61FF]" />
-                  <span>Real-World Projects</span>
+                  <span>100% Virtual</span>
                 </div>
-              </div>
+              </motion.div>
 
             </div>
 
             {/* Right Column Visual: User Provided Image with Annotations & Floating Elements */}
-            <div className="lg:col-span-6 relative flex items-center justify-center">
+            <motion.div
+              initial={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.65, delay: 0.2, ease: 'easeOut' }}
+              className="lg:col-span-6 relative flex items-center justify-center"
+            >
 
               <div className="absolute inset-0 bg-gradient-to-tr from-blue-100/50 via-indigo-100/40 to-blue-50 rounded-full blur-2xl transform scale-95 pointer-events-none" />
 
               <div className="relative w-full max-w-lg">
 
                 {/* Provided Image of Student */}
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-white">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-white transition-all duration-500 hover:shadow-blue-500/15">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/assets/hero-student.jpg"
-                    alt="Student working on laptop for virtual internship"
+                    alt="Student completing free verified virtual internship project online with InternJourneys"
                     className="w-full h-auto object-cover max-h-[460px]"
                   />
                   <div className="absolute inset-0 ring-1 ring-black/5 rounded-3xl pointer-events-none" />
@@ -195,7 +401,7 @@ export default function LandingPageClient() {
 
                 {/* Floating Badge Card */}
                 <div className="absolute top-10 -right-2 sm:-right-6 z-20 animate-float-slow">
-                  <div className="bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-3.5 max-w-[200px]">
+                  <div className="bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-3.5 max-w-[200px] transition-transform hover:scale-105">
                     <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1D61FF] flex items-center justify-center font-bold shadow-2xs">
                       <BarChart2 className="w-5 h-5" />
                     </div>
@@ -210,7 +416,7 @@ export default function LandingPageClient() {
 
               </div>
 
-            </div>
+            </motion.div>
 
           </div>
         </div>
@@ -239,7 +445,7 @@ export default function LandingPageClient() {
                   <div className="flex items-center justify-center gap-3">
                     <Activity className="hidden sm:block h-9 w-9 text-[#1D61FF]" />
                     <p className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight bg-gradient-to-r from-[#1D61FF] to-[#7C3AED] bg-clip-text text-transparent">
-                      12
+                      16
                     </p>
                   </div>
                   <h2 className="mt-3 text-sm sm:text-base font-extrabold text-slate-600 tracking-[0.22em] uppercase">
@@ -258,21 +464,21 @@ export default function LandingPageClient() {
               <div className="relative z-10 space-y-5">
                 <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#EDF3FF] text-[#1D61FF] text-[11px] font-extrabold tracking-wider uppercase">
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
-                  Secure Verification
+                  Verified Community
                 </span>
                 <div>
                   <div className="flex items-center justify-center gap-3">
-                    <BadgeCheck className="hidden sm:block h-9 w-9 text-emerald-500" />
+                    <Users className="hidden sm:block h-9 w-9 text-emerald-500" />
                     <p className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-emerald-600">
-                      60+
+                      <CountUpNumber target={159544} suffix="+" />
                     </p>
                   </div>
                   <h2 className="mt-3 text-sm sm:text-base font-extrabold text-slate-600 tracking-[0.22em] uppercase">
-                    Practical Tasks
+                    Active Interns
                   </h2>
                 </div>
                 <p className="max-w-sm mx-auto text-sm sm:text-base text-slate-500 font-medium leading-relaxed">
-                  Project-based tasks with guides, deliverables, and evaluation criteria.
+                  Students, freshers, and graduates building future-ready practical project experience.
                 </p>
               </div>
             </div>
@@ -330,8 +536,8 @@ export default function LandingPageClient() {
           <div className="flex flex-col items-center gap-1 sm:items-start">
             <Logo subtitle={false} />
             <span className="text-[10px] text-slate-400">InternJourneys · Proprietor: VADIVEL BHUVANESH · Pudukkottai district, Tamil Nadu, India</span>
-            <a href="mailto:bhuvaneshbhuvan128@gmail.com" className="text-[10px] font-semibold text-indigo-600 hover:underline">
-              bhuvaneshbhuvan128@gmail.com
+            <a href="mailto:internjourney26@gmail.com" className="text-[10px] font-semibold text-indigo-600 hover:underline">
+              internjourney26@gmail.com
             </a>
           </div>
           <nav aria-label="Footer navigation" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 font-semibold">

@@ -51,8 +51,8 @@ export function PublicInfoLayout({
           <div className="space-y-2">
             <Logo subtitle={false} />
             <p className="text-xs text-slate-500">InternJourneys · Proprietor: VADIVEL BHUVANESH · Pudukkottai district, Tamil Nadu, India</p>
-            <a href="mailto:bhuvaneshbhuvan128@gmail.com" className="text-xs font-semibold text-indigo-600 hover:underline">
-              bhuvaneshbhuvan128@gmail.com
+            <a href="mailto:internjourney26@gmail.com" className="text-xs font-semibold text-indigo-600 hover:underline">
+              internjourney26@gmail.com
             </a>
           </div>
           <nav aria-label="Legal and company information" className="flex flex-wrap gap-x-5 gap-y-3 text-xs font-semibold text-slate-600 lg:justify-end">

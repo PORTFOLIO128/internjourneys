@@ -1,5 +1,12 @@
 import { UserProfile, Task, InternshipDomain, PaymentItem, CertificateData } from '@/lib/types';
 
+export const ADDITIONAL_DOMAIN_SLUGS = [
+  'deep-learning',
+  'backend-developer',
+  'forward-deployed-engineer',
+  'mlops',
+] as const;
+
 export const mockUser: UserProfile = {
   name: "Hari Narayan S",
   initials: "HN",
@@ -217,6 +224,48 @@ export const mockDomains: InternshipDomain[] = [
     projectCount: 4,
     category: "Security & Cloud",
     skills: ["AWS", "Docker", "Kubernetes", "GitHub Actions", "Terraform"]
+  },
+  {
+    id: "deep-learning",
+    title: "Deep Learning",
+    description: "Build advanced neural networks, CNNs, RNNs, and transformer architectures using PyTorch and TensorFlow for real-world AI applications.",
+    duration: "6 Weeks",
+    level: "Advanced",
+    projectCount: 4,
+    category: "Data & AI",
+    skills: ["PyTorch", "TensorFlow", "Keras", "CNNs", "Transformers"],
+    popular: true
+  },
+  {
+    id: "backend-developer",
+    title: "Backend Developer",
+    description: "Design and build scalable REST and GraphQL APIs, microservices, auth systems, and production-ready server-side architectures.",
+    duration: "4 Weeks",
+    level: "Intermediate",
+    projectCount: 5,
+    category: "Software Development",
+    skills: ["Node.js", "Express.js", "PostgreSQL", "Redis", "GraphQL"]
+  },
+  {
+    id: "forward-deployed-engineer",
+    title: "Forward Deployed Engineer",
+    description: "Bridge product and customer by building rapid prototypes, custom integrations, and on-site technical solutions for enterprise clients.",
+    duration: "4 Weeks",
+    level: "Advanced",
+    projectCount: 4,
+    category: "Software Development",
+    skills: ["Python", "REST APIs", "SQL", "React.js", "Systems Design"]
+  },
+  {
+    id: "mlops",
+    title: "MLOps",
+    description: "Operationalize machine learning models with CI/CD pipelines, experiment tracking, model serving, monitoring, and cloud infrastructure.",
+    duration: "6 Weeks",
+    level: "Advanced",
+    projectCount: 4,
+    category: "Data & AI",
+    skills: ["MLflow", "Docker", "GitHub Actions", "FastAPI", "Kubernetes"],
+    popular: true
   }
 ];
 

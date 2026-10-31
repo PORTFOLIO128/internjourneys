@@ -52,7 +52,7 @@ export default function TermsAndConditionsPage() {
 
       <InfoSection title="6. Payments">
         <p>Payments are processed through Cashfree. The payment provider’s checkout and applicable payment terms also apply. InternJourneys stores payment references and status information needed to reconcile transactions and certificate eligibility; it does not ask you to send card PINs, passwords or one-time passcodes to support.</p>
-        <p>If a payment appears pending or you see an unexpected charge, contact <a className="font-semibold text-indigo-600 hover:underline" href="mailto:bhuvaneshbhuvan128@gmail.com">bhuvaneshbhuvan128@gmail.com</a> with the transaction reference and account email.</p>
+        <p>If a payment appears pending or you see an unexpected charge, contact <a className="font-semibold text-indigo-600 hover:underline" href="mailto:internjourney26@gmail.com">internjourney26@gmail.com</a> with the transaction reference and account email.</p>
       </InfoSection>
 
       <InfoSection title="7. Content and intellectual property">
@@ -66,7 +66,7 @@ export default function TermsAndConditionsPage() {
       </InfoSection>
 
       <InfoSection title="9. Support, disputes and changes">
-        <p>Questions or complaints can be sent to <a className="font-semibold text-indigo-600 hover:underline" href="mailto:bhuvaneshbhuvan128@gmail.com">bhuvaneshbhuvan128@gmail.com</a>. We will review requests and respond through the contact information associated with the request; no response timeframe is stated here.</p>
+        <p>Questions or complaints can be sent to <a className="font-semibold text-indigo-600 hover:underline" href="mailto:internjourney26@gmail.com">internjourney26@gmail.com</a>. We will review requests and respond through the contact information associated with the request; no response timeframe is stated here.</p>
         <p>These terms may be updated when the service or legal requirements change. The current version and its update date will be published on this page. Applicable Indian laws continue to apply, including consumer rights that cannot lawfully be excluded.</p>
       </InfoSection>
     </PublicInfoLayout>

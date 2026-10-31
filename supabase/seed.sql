@@ -348,4 +348,72 @@ select seed_domain_with_tasks(
   '["Flutter or React Native","REST API","Authentication","SQLite"]'::jsonb
 );
 
+select seed_domain_with_tasks(
+  'deep-learning',
+  'Deep Learning',
+  'Build advanced neural networks, CNNs, RNNs, and transformer architectures using PyTorch and TensorFlow for real-world AI applications.',
+  'Develop and evaluate deep learning solutions through hands-on projects covering neural network fundamentals, computer vision, sequence models, and transformer architectures.',
+  'Advanced',
+  6,
+  'cpu',
+  'purple',
+  13,
+  array['PyTorch','TensorFlow','Keras','CNNs','Transformers'],
+  array['Neural Network Fundamentals','Image Classification with CNNs','Sequence Modeling with RNNs','Transfer Learning','Transformer-Based Application'],
+  'PyTorch Documentation',
+  'https://pytorch.org/docs/',
+  '["Python","PyTorch","TensorFlow","Jupyter"]'::jsonb
+);
+
+select seed_domain_with_tasks(
+  'backend-developer',
+  'Backend Developer',
+  'Design and build scalable REST and GraphQL APIs, microservices, auth systems, and production-ready server-side architectures.',
+  'Build production-minded backend services covering API design, data persistence, authentication, caching, and service architecture.',
+  'Intermediate',
+  4,
+  'code',
+  'blue',
+  14,
+  array['Node.js','Express.js','PostgreSQL','Redis','GraphQL'],
+  array['REST API Design','PostgreSQL Data Layer','Authentication and Authorization','Caching with Redis','GraphQL Service'],
+  'Node.js Documentation',
+  'https://nodejs.org/docs/latest/api/',
+  '["Node.js","Express.js","PostgreSQL","Redis","GraphQL"]'::jsonb
+);
+
+select seed_domain_with_tasks(
+  'forward-deployed-engineer',
+  'Forward Deployed Engineer',
+  'Bridge product and customer by building rapid prototypes, custom integrations, and on-site technical solutions for enterprise clients.',
+  'Practice the end-to-end work of a forward deployed engineer: understand customer needs, prototype solutions, integrate APIs and data, and communicate technical outcomes.',
+  'Advanced',
+  4,
+  'terminal',
+  'emerald',
+  15,
+  array['Python','REST APIs','SQL','React.js','Systems Design'],
+  array['Customer Problem Discovery','Rapid Technical Prototype','API Integration','Data Workflow','Solution Handoff and Demo'],
+  'FastAPI Documentation',
+  'https://fastapi.tiangolo.com/',
+  '["Python","REST APIs","SQL","React.js"]'::jsonb
+);
+
+select seed_domain_with_tasks(
+  'mlops',
+  'MLOps',
+  'Operationalize machine learning models with CI/CD pipelines, experiment tracking, model serving, monitoring, and cloud infrastructure.',
+  'Learn to package, deploy, monitor, and continuously improve machine learning systems with reproducible workflows and production-focused tooling.',
+  'Advanced',
+  6,
+  'cloud',
+  'cyan',
+  16,
+  array['MLflow','Docker','GitHub Actions','FastAPI','Kubernetes'],
+  array['Experiment Tracking with MLflow','Containerize a Model Service','Automated Model Testing','Deploy a Model API','Monitor Model Performance'],
+  'MLflow Documentation',
+  'https://mlflow.org/docs/latest/index.html',
+  '["MLflow","Docker","GitHub Actions","FastAPI","Kubernetes"]'::jsonb
+);
+
 drop function if exists seed_domain_with_tasks(text,text,text,text,text,integer,text,text,integer,text[],text[],text,text,jsonb);
