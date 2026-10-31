@@ -16,6 +16,11 @@ export default function DomainDetailClient({ domain }: { domain: DomainRow }) {
   const [error, setError] = useState('');
 
   const startInternship = async () => {
+    if (domain.id.startsWith('mock-')) {
+      setError('This internship track is listed in the catalog but is not yet available for enrollment. Please try again later.');
+      return;
+    }
+
     const { data } = await supabase.auth.getSession();
     if (!data.session) {
       router.push(`/login?domain=${encodeURIComponent(domain.slug)}`);

@@ -67,7 +67,7 @@ export default function AboutPage() {
       </InfoSection>
 
       <InfoSection title="Contact">
-        <p>For questions about the platform, contact <a className="font-semibold text-indigo-600 hover:underline" href="mailto:bhuvaneshbhuvan128@gmail.com">bhuvaneshbhuvan128@gmail.com</a>. InternJourneys is operated by proprietor VADIVEL BHUVANESH in Pudukkottai district, Tamil Nadu, India.</p>
+        <p>For questions about the platform, contact <a className="font-semibold text-indigo-600 hover:underline" href="mailto:internjourney26@gmail.com">internjourney26@gmail.com</a>. InternJourneys is operated by proprietor VADIVEL BHUVANESH in Pudukkottai district, Tamil Nadu, India.</p>
       </InfoSection>
     </PublicInfoLayout>
   );

@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
       updatedAt="2 June 2026"
     >
       <InfoSection title="1. Who is responsible">
-        <p>InternJourneys, operated by proprietor VADIVEL BHUVANESH, is responsible for this service in Pudukkottai district, Tamil Nadu, India. For privacy questions or requests, email <a className="font-semibold text-indigo-600 hover:underline" href="mailto:bhuvaneshbhuvan128@gmail.com">bhuvaneshbhuvan128@gmail.com</a>.</p>
+        <p>InternJourneys, operated by proprietor VADIVEL BHUVANESH, is responsible for this service in Pudukkottai district, Tamil Nadu, India. For privacy questions or requests, email <a className="font-semibold text-indigo-600 hover:underline" href="mailto:internjourney26@gmail.com">internjourney26@gmail.com</a>.</p>
       </InfoSection>
 
       <InfoSection title="2. Information processed">
@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
       </InfoSection>
 
       <InfoSection title="8. Changes and privacy contact">
-        <p>We may update this policy as the service or applicable requirements change. The current version and update date will appear on this page. Send privacy questions to <a className="font-semibold text-indigo-600 hover:underline" href="mailto:bhuvaneshbhuvan128@gmail.com">bhuvaneshbhuvan128@gmail.com</a>.</p>
+        <p>We may update this policy as the service or applicable requirements change. The current version and update date will appear on this page. Send privacy questions to <a className="font-semibold text-indigo-600 hover:underline" href="mailto:internjourney26@gmail.com">internjourney26@gmail.com</a>.</p>
       </InfoSection>
     </PublicInfoLayout>
   );

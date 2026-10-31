@@ -30,7 +30,7 @@ export default function RefundPolicyPage() {
       </InfoSection>
 
       <InfoSection title="2. Suspected duplicate payments">
-        <p>If you believe you were charged more than once for the same certificate fee, email <a className="font-semibold text-indigo-600 hover:underline" href="mailto:bhuvaneshbhuvan128@gmail.com">bhuvaneshbhuvan128@gmail.com</a> with your account email, order or transaction reference, and a brief description. We will compare the platform and provider records. Eligible duplicate charges will be corrected or refunded in accordance with applicable law and payment-provider procedures.</p>
+        <p>If you believe you were charged more than once for the same certificate fee, email <a className="font-semibold text-indigo-600 hover:underline" href="mailto:internjourney26@gmail.com">internjourney26@gmail.com</a> with your account email, order or transaction reference, and a brief description. We will compare the platform and provider records. Eligible duplicate charges will be corrected or refunded in accordance with applicable law and payment-provider procedures.</p>
       </InfoSection>
 
       <InfoSection title="3. Failed, pending or interrupted payments">
@@ -48,7 +48,7 @@ export default function RefundPolicyPage() {
       </InfoSection>
 
       <InfoSection title="6. How to contact us">
-        <p>Email <a className="font-semibold text-indigo-600 hover:underline" href="mailto:bhuvaneshbhuvan128@gmail.com">bhuvaneshbhuvan128@gmail.com</a>. Include the account email, order/payment reference, date and a concise explanation. Do not include passwords, card numbers, PINs or OTPs. No fixed response or refund-processing timeframe is stated here.</p>
+        <p>Email <a className="font-semibold text-indigo-600 hover:underline" href="mailto:internjourney26@gmail.com">internjourney26@gmail.com</a>. Include the account email, order/payment reference, date and a concise explanation. Do not include passwords, card numbers, PINs or OTPs. No fixed response or refund-processing timeframe is stated here.</p>
       </InfoSection>
     </PublicInfoLayout>
   );
