@@ -159,16 +159,14 @@ test('Homepage SEO and Structured Data Verification', () => {
 
   // Title
   assert.ok(
-    pageFile.includes('Free Verified Virtual Internships 2026 in India | InternJourneys'),
+    pageFile.includes('Free Online & Virtual Internship for Students | InternJourneys'),
     'Homepage SEO title must match requested tag'
   );
 
   // Meta description
   assert.ok(
-    pageFile.includes(
-      'Build future-ready skills with free, verified virtual internships at InternJourneys. Explore hands-on project tracks, receive an offer letter, and gain practical experience from anywhere in India.'
-    ),
-    'Homepage meta description must match requested copy'
+    pageFile.includes('Registration, learning, and required tasks are free; certificate issuance costs ₹99.'),
+    'Homepage meta description must accurately disclose the certificate fee'
   );
 
   // Canonical
@@ -178,11 +176,10 @@ test('Homepage SEO and Structured Data Verification', () => {
   );
 
   // Keywords
-  assert.ok(pageFile.includes('Online Internships'), 'Includes Online Internships keyword');
-  assert.ok(pageFile.includes('Free Internships'), 'Includes Free Internships keyword');
-  assert.ok(pageFile.includes('Virtual Internships'), 'Includes Virtual Internships keyword');
-  assert.ok(pageFile.includes('AI Virtual Internship'), 'Includes AI Virtual Internship keyword');
-  assert.ok(pageFile.includes('Data Science Internship'), 'Includes Data Science Internship keyword');
+  assert.ok(pageFile.includes('online internship'), 'Includes online internship keyword');
+  assert.ok(pageFile.includes('free virtual internship'), 'Includes free virtual internship keyword');
+  assert.ok(pageFile.includes('virtual internship for students'), 'Includes virtual internship for students keyword');
+  assert.ok(pageFile.includes('online internship in India'), 'Includes online internship in India keyword');
 
   // Structured Data
   const structuredDataFile = fs.readFileSync(

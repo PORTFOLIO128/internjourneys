@@ -20,7 +20,7 @@ const structuredData = [
     },
     logo: `${SITE_URL}/assets/internjourneys-monogram.png`,
     description:
-      'Online virtual internship platform providing free verified virtual internships, hands-on project tasks, and instant offer letters for students across India.',
+      'Online and virtual internship platform for students across India, with project-based tasks. Registration, learning, and required tasks are free; certificate issuance costs ₹99.',
   },
   {
     '@context': 'https://schema.org',
@@ -29,7 +29,7 @@ const structuredData = [
     name: 'InternJourneys',
     url: SITE_URL,
     description:
-      'Explore free virtual internships in India with InternJourneys. Choose online internship domains, learn through guided projects, receive an offer letter, and build practical skills.',
+      'Find an online internship or virtual internship for students in India. Registration, learning, and required tasks are free; certificate issuance costs ₹99.',
     publisher: {
       '@id': `${SITE_URL}/#organization`,
     },
@@ -54,9 +54,9 @@ export function HomeStructuredData() {
     '@type': 'WebPage',
     '@id': `${SITE_URL}/#webpage`,
     url: SITE_URL,
-    name: 'Free Verified Virtual Internships 2026 in India | InternJourneys',
+    name: 'Free Online & Virtual Internship for Students | InternJourneys',
     description:
-      'Build future-ready skills with free, verified virtual internships at InternJourneys. Explore hands-on project tracks, receive an offer letter, and gain practical experience from anywhere in India.',
+      'Find an online internship or virtual internship for students in India. Registration, learning, and required tasks are free; certificate issuance costs ₹99.',
     isPartOf: {
       '@id': `${SITE_URL}/#website`,
     },

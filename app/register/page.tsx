@@ -111,11 +111,11 @@ function RegisterForm() {
     'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1D61FF] focus:ring-2 focus:ring-[#1D61FF]/15 text-xs font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 bg-slate-50 focus:bg-white';
 
   const fields = [
-    { id: 'register-name', label: 'Full Name', type: 'text', icon: User, key: 'name', placeholder: 'Hari Narayan S' },
-    { id: 'register-email', label: 'Email Address (Gmail)', type: 'email', icon: Mail, key: 'email', placeholder: 'hari@gmail.com' },
+    { id: 'register-name', label: 'Full Name', type: 'text', icon: User, key: 'name', placeholder: 'Name' },
+    { id: 'register-email', label: 'Email Address (Gmail)', type: 'email', icon: Mail, key: 'email', placeholder: 'you@gmail.com' },
     { id: 'register-password', label: 'Password', type: 'password', icon: Lock, key: 'password', placeholder: '••••••••' },
     { id: 'register-confirm-password', label: 'Confirm Password', type: 'password', icon: Lock, key: 'confirmPassword', placeholder: '••••••••' },
-    { id: 'register-phone', label: 'Mobile Number', type: 'tel', icon: Phone, key: 'phone', placeholder: '9876543210' },
+    { id: 'register-phone', label: 'Mobile Number', type: 'tel', icon: Phone, key: 'phone', placeholder: 'Mobile number' },
     { id: 'register-college', label: 'College / University', type: 'text', icon: GraduationCap, key: 'college', placeholder: 'IIT / Anna University' },
   ];
 

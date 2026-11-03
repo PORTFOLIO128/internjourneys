@@ -21,16 +21,16 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'InternJourneys — Virtual Internships That Build Real Skills',
+    default: 'Online & Virtual Internships for Students | InternJourneys',
     template: '%s | InternJourneys',
   },
-  description: 'Explore structured virtual internships, project-based learning tasks, and certificates with online verification through InternJourneys.',
+  description: 'Find an online internship or virtual internship for students in India. Registration, learning, and required tasks are free; certificate issuance costs ₹99.',
   openGraph: {
     type: 'website',
     locale: 'en_IN',
     siteName: 'InternJourneys',
-    title: 'InternJourneys — Virtual Internships That Build Real Skills',
-    description: 'Explore structured virtual internships, project-based learning tasks, and certificates with online verification through InternJourneys.',
+    title: 'Online & Virtual Internships for Students | InternJourneys',
+    description: 'Find an online internship or virtual internship for students in India. Registration, learning, and required tasks are free; certificate issuance costs ₹99.',
     url: '/',
     images: [{ url: '/assets/hero-student.jpg' }],
   },

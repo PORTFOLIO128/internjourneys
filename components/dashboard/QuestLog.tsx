@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ListTodo, CheckCircle2 } from 'lucide-react';
 import { Task } from '@/lib/types';
+import { sortTasksBySequence } from '@/lib/taskOrdering';
 import { TaskCard } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
 
@@ -14,9 +15,10 @@ interface QuestLogProps {
 export const QuestLog: React.FC<QuestLogProps> = ({ tasks, onTaskSubmit }) => {
   const [filter, setFilter] = useState<'all' | 'completed' | 'pending'>('all');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const selectedTask = tasks.find((task) => task.id === selectedTaskId) || null;
+  const orderedTasks = sortTasksBySequence(tasks);
+  const selectedTask = orderedTasks.find((task) => task.id === selectedTaskId) || null;
 
-  const filteredTasks = tasks.filter((task) => {
+  const filteredTasks = orderedTasks.filter((task) => {
     if (filter === 'completed') return task.status === 'Completed';
     if (filter === 'pending') return task.status !== 'Completed';
     return true;

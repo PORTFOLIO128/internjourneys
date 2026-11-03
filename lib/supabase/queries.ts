@@ -2,6 +2,7 @@
 
 import { supabase } from './client';
 import { DomainRow, StudentTaskRow, TaskRow, mapStudentTask } from './types';
+import { sortTasksBySequence } from '@/lib/taskOrdering';
 import type { PlatformStats, UserProfile, InternshipApplication, ApplicationStatus, AdminPayment, StudentCertificateAccess, AdminCertificateAccess } from '@/lib/types';
 
 export async function getActiveDomains() {
@@ -53,7 +54,7 @@ export async function getStudentTasks() {
     .order('created_at', { ascending: true });
 
   if (error) throw error;
-  return ((data || []) as StudentTaskRow[]).map(mapStudentTask);
+  return sortTasksBySequence(((data || []) as StudentTaskRow[]).map(mapStudentTask));
 }
 
 export async function submitStudentTask(studentTaskId: string, submission: { url?: string; text?: string }) {
