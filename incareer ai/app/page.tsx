@@ -5,34 +5,25 @@ import LandingPageClient from './LandingPageClient';
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Free Verified Virtual Internships 2026 in India | InternJourneys',
+    absolute: 'Free Online & Virtual Internship for Students | InternJourneys',
   },
   description:
-    'Build future-ready skills with free, verified virtual internships at InternJourneys. Explore hands-on project tracks, receive an offer letter, and gain practical experience from anywhere in India.',
+    'Find an online internship or virtual internship for students in India. Registration, learning, and required tasks are free; certificate issuance costs ₹99.',
   keywords: [
-    'Online Internships',
-    'Free Internships',
-    'Virtual Internships',
-    'Online Internships for Students',
-    'Free Virtual Internships',
-    'Virtual Internship in India',
-    'Online Internship Programs',
-    'Project-Based Virtual Internships',
-    'AI Virtual Internship',
-    'Data Science Internship',
-    'Web Development Internship',
-    'Generative AI Internship',
-    'Cybersecurity Internship',
-    'Python Internship',
-    'Cloud Computing Internship',
+    'virtual internship',
+    'online internship',
+    'virtual internship for students',
+    'online internship for students',
+    'free virtual internship',
+    'online internship in India',
   ],
   alternates: {
     canonical: 'https://internjourneys.in/',
   },
   openGraph: {
-    title: 'Free Verified Virtual Internships 2026 in India | InternJourneys',
+    title: 'Free Online & Virtual Internship for Students | InternJourneys',
     description:
-      'Build future-ready skills with free, verified virtual internships at InternJourneys. Explore hands-on project tracks, receive an offer letter, and gain practical experience from anywhere in India.',
+      'Find an online internship or virtual internship for students in India. Registration, learning, and required tasks are free; certificate issuance costs ₹99.',
     url: 'https://internjourneys.in/',
     siteName: 'InternJourneys',
     locale: 'en_IN',
@@ -42,15 +33,15 @@ export const metadata: Metadata = {
         url: '/assets/hero-student.jpg',
         width: 1200,
         height: 630,
-        alt: 'Free Virtual Internships in India - InternJourneys',
+        alt: 'Online and virtual internship programs for students in India - InternJourneys',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Verified Virtual Internships 2026 in India | InternJourneys',
+    title: 'Free Online & Virtual Internship for Students | InternJourneys',
     description:
-      'Build future-ready skills with free, verified virtual internships at InternJourneys. Explore hands-on project tracks, receive an offer letter, and gain practical experience from anywhere in India.',
+      'Find an online internship or virtual internship for students in India. Registration, learning, and required tasks are free; certificate issuance costs ₹99.',
     images: ['/assets/hero-student.jpg'],
   },
 };
